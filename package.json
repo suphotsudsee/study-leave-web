@@ -1,0 +1,6 @@
+{
+  "name": "study-leave-web",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js"
+}
