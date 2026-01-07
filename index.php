@@ -40,10 +40,16 @@ function get_request_path(): string
 
 function get_pdo(): PDO
 {
-    $host = 'localhost';
-    $db = 'slms';
-    $user = 'root';
-    $pass = '12345678';
+    $envPath = __DIR__ . '/.env.local';
+    $env = [];
+    if (is_file($envPath)) {
+        $env = parse_ini_file($envPath, false, INI_SCANNER_RAW) ?: [];
+    }
+
+    $host = $env['DB_HOST'] ?? 'localhost';
+    $db = $env['DB_NAME'] ?? 'slms';
+    $user = $env['DB_USER'] ?? 'root';
+    $pass = $env['DB_PASS'] ?? '';
     $dsn = "mysql:host={$host};dbname={$db};charset=utf8mb4";
 
     return new PDO($dsn, $user, $pass, [
