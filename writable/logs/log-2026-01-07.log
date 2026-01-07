@@ -50,3 +50,48 @@ The framework needs the following extension(s) installed and loaded: intl.
 #4 {main}
 in SYSTEMPATH\I18n\TimeTrait.php on line 74.
  1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:10:39 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:10:41 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:10:42 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:10:42 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:29 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:30 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:30 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:31 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:31 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:32 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:33 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:34 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:34 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:11:35 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-01-07 09:12:40 --> ErrorException: Constant expression contains invalid operations
+in APPPATH\Config\Database.php on line 29.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()

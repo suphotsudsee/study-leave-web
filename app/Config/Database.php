@@ -28,10 +28,10 @@ class Database extends Config
      */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => env('DB_HOST', 'localhost'),
-        'username'     => env('DB_USER', ''),
-        'password'     => env('DB_PASS', ''),
-        'database'     => env('DB_NAME', ''),
+        'hostname'     => 'localhost',
+        'username'     => '',
+        'password'     => '',
+        'database'     => '',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
@@ -78,6 +78,11 @@ class Database extends Config
     public function __construct()
     {
         parent::__construct();
+
+        $this->default['hostname'] = env('DB_HOST', 'localhost');
+        $this->default['username'] = env('DB_USER', '');
+        $this->default['password'] = env('DB_PASS', '');
+        $this->default['database'] = env('DB_NAME', '');
 
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
