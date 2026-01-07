@@ -603,10 +603,24 @@ class Api extends BaseController
 
         $inserted = 0;
         $skipped = 0;
+        $duplicateCount = 0;
+        $duplicates = [];
+        $existingKeys = [];
+        $seenKeys = [];
 
         try {
+            $existingRows = $db->query('SELECT cid, order_no, start_date, end_date FROM study_leaves')->getResultArray();
+            foreach ($existingRows as $row) {
+                $key = strtolower(trim((string) ($row['cid'] ?? '')))
+                    . '|' . strtolower(trim((string) ($row['order_no'] ?? '')))
+                    . '|' . (string) ($row['start_date'] ?? '')
+                    . '|' . (string) ($row['end_date'] ?? '');
+                $existingKeys[$key] = true;
+            }
+
             $builder = $db->table('study_leaves');
-            foreach (array_slice($rows, $dataStart) as $row) {
+            $dataRows = array_slice($rows, $dataStart);
+            foreach ($dataRows as $offset => $row) {
                 $cid = $this->getCell($row, $headerMap, 'cid');
                 $fullName = $this->getCell($row, $headerMap, 'full_name');
                 if ($cid === null && $fullName === null) {
@@ -627,6 +641,30 @@ class Api extends BaseController
                     $programYears = 1;
                 }
 
+                $orderNo = $this->getCell($row, $headerMap, 'order_no') ?? '';
+                $key = strtolower(trim((string) ($cid ?? '')))
+                    . '|' . strtolower(trim((string) $orderNo))
+                    . '|' . $startDate
+                    . '|' . $endDate;
+                $isDuplicate = isset($existingKeys[$key]) || isset($seenKeys[$key]);
+                if ($isDuplicate) {
+                    $duplicateCount++;
+                    $skipped++;
+                    if (count($duplicates) < 20) {
+                        $duplicates[] = [
+                            'row' => $dataStart + $offset + 1,
+                            'cid' => $cid ?? '',
+                            'full_name' => $fullName ?? '',
+                            'order_no' => $orderNo,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'source' => isset($existingKeys[$key]) ? 'existing' : 'file',
+                        ];
+                    }
+                    continue;
+                }
+
+                $seenKeys[$key] = true;
                 $builder->insert([
                     'cid' => $cid ?? '',
                     'full_name' => $fullName ?? '',
@@ -639,7 +677,7 @@ class Api extends BaseController
                     'start_date' => $startDate,
                     'end_date' => $endDate,
                     'note' => $this->getCell($row, $headerMap, 'note'),
-                    'order_no' => $this->getCell($row, $headerMap, 'order_no') ?? '',
+                    'order_no' => $orderNo,
                 ]);
                 $inserted++;
             }
@@ -667,6 +705,8 @@ class Api extends BaseController
             'path' => $storedPath,
             'inserted' => $inserted,
             'skipped' => $skipped,
+            'duplicate_count' => $duplicateCount,
+            'duplicates' => $duplicates,
         ]);
     }
 

@@ -156,15 +156,32 @@
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          const msg = data.message || `อัปโหลดไม่สำเร็จ (${res.status})`;
+          const msg = data.error || data.message || `อัปโหลดไม่สำเร็จ (${res.status})`;
           statusBox.textContent = msg;
           statusBox.className = 'mt-3 text-sm text-red-600';
         } else {
+          const duplicates = Array.isArray(data.duplicates) ? data.duplicates : [];
+          const duplicateCount = data.duplicate_count ?? 0;
+          const duplicateHtml = duplicates.length ? `
+            <div class="mt-2 text-sm text-slate-600">
+              <div class="font-semibold text-slate-700">รายการซ้ำ (แสดงสูงสุด 20)</div>
+              <ul class="list-disc pl-5 space-y-1">
+                ${duplicates.map(item => `
+                  <li>
+                    แถว ${item.row ?? '-'}: ${item.full_name || '-'} (${item.cid || '-'}) เลขคำสั่ง ${item.order_no || '-'}
+                    ${item.source === 'existing' ? ' (มีอยู่แล้ว)' : ' (ซ้ำในไฟล์)'}
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          ` : '';
           statusBox.innerHTML = `
             ✅ นำเข้าข้อมูลสำเร็จ<br>
             ชื่อไฟล์เดิม: ${data.originalName || file.name}<br>
             รายการที่นำเข้า: ${data.inserted || 0}<br>
-            ข้าม: ${data.skipped || 0}
+            ข้าม: ${data.skipped || 0}<br>
+            ซ้ำ: ${duplicateCount}
+            ${duplicateHtml}
           `;
           statusBox.className = 'mt-3 text-sm text-emerald-700';
           fileInput.value = '';
