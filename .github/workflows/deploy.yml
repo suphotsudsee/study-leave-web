@@ -1,4 +1,4 @@
-name: Deploy paymonth-nextjs on self-hosted server
+name: Deploy study-leave-web on self-hosted server
 
 on:
   push:
@@ -12,11 +12,11 @@ jobs:
     steps:
       - name: Go to project folder
         run: |
-          cd /home/phoubon-test-paymonth/htdocs/test-paymonth.phoubon.in.th
+          cd /home/phoubon-studyleaveweb/htdocs/study-leave-web.phoubon.in.th
           pwd
           ls
 
       - name: Git pull latest code
         run: |
-          cd /home/phoubon-test-paymonth/htdocs/test-paymonth.phoubon.in.th
+          cd /home/phoubon-studyleaveweb/htdocs/study-leave-web.phoubon.in.th
           git pull origin main
