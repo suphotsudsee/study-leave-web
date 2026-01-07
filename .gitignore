@@ -1,1 +1,6 @@
 .env.local
+_ci4_full.zip
+_ci4.zip
+_ci4/
+_ci4_full/
+system/
