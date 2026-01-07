@@ -361,12 +361,15 @@ class Api extends BaseController
 
         arsort($positionCounts);
         $topPositions = [];
+        $topTotal = 0;
         foreach ($positionCounts as $position => $count) {
             $topPositions[] = ['position' => $position, 'count' => $count];
+            $topTotal += $count;
             if (count($topPositions) >= 4) {
                 break;
             }
         }
+        $otherPositions = max(0, $total - $topTotal);
 
         return $this->json([
             'data' => [
@@ -375,6 +378,7 @@ class Api extends BaseController
                 'due_to_reinstate' => $due,
                 'suspension_amount' => 0,
                 'top_positions' => $topPositions,
+                'other_positions' => $otherPositions,
                 'recent_imports' => $imports,
             ],
         ]);

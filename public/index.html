@@ -98,7 +98,7 @@
         </div>
 
         <!-- Stat cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl">👤</div>
@@ -133,6 +133,15 @@
             </div>
             <div id="pos-4-name" class="text-lg font-semibold text-slate-900">—</div>
             <div class="text-slate-500 text-sm mt-1"><span id="pos-4-count">0</span> ราย</div>
+          </div>
+
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-2xl">👥</div>
+              <span class="text-xs font-semibold text-slate-600">ตำแหน่งอื่นๆ</span>
+            </div>
+            <div class="text-lg font-semibold text-slate-900">—</div>
+            <div class="text-slate-500 text-sm mt-1"><span id="pos-other-count">0</span> ราย</div>
           </div>
         </div>
 
@@ -170,6 +179,10 @@
           countEl.textContent = '0';
         }
       });
+      const otherCountEl = document.getElementById('pos-other-count');
+      if (otherCountEl) {
+        otherCountEl.textContent = stat.other_positions ?? 0;
+      }
 
       const imports = Array.isArray(stat.recent_imports) ? stat.recent_imports : [];
       if (!imports.length) {
@@ -203,6 +216,10 @@
         nameEl.textContent = 'เชื่อมต่อ API ไม่สำเร็จ';
         countEl.textContent = '0';
       });
+      const otherCountEl = document.getElementById('pos-other-count');
+      if (otherCountEl) {
+        otherCountEl.textContent = '0';
+      }
       recentImportsEl.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
     }
 
