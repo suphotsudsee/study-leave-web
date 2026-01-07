@@ -161,13 +161,9 @@
     const openCreate = document.getElementById('open-create');
     const modalTitle = document.getElementById('modal-title');
 
-    const users = [
-      { id: 1, username: 'admin', full_name: 'ผู้ดูแลระบบ', email: 'admin@example.com', role: 'admin' },
-      { id: 2, username: 'staff01', full_name: 'เจ้าหน้าที่ ก', email: 'staff01@example.com', role: 'staff' },
-      { id: 3, username: 'viewer01', full_name: 'ผู้ตรวจสอบ ข', email: 'viewer01@example.com', role: 'viewer' },
-    ];
-
-    let filteredUsers = [...users];
+    const BASE_API = '/study-leave-web/index.php/api';
+    let users = [];
+    let filteredUsers = [];
     let isCreateMode = false;
 
     function renderUsers(list) {
@@ -196,10 +192,28 @@
       filteredUsers = [...users];
     }
 
+    async function fetchUsers() {
+      usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>';
+      try {
+        const res = await fetch(`${BASE_API}/users`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.data) {
+          usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
+          return;
+        }
+        users = data.data;
+        applyFilters();
+        renderUsers(filteredUsers);
+      } catch (err) {
+        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
+      }
+    }
+
     function openEditModal(user) {
       isCreateMode = false;
       modalTitle.textContent = 'แก้ไขผู้ใช้';
       editStatus.textContent = '';
+      editForm.elements.password.required = false;
       editForm.elements.id.value = user.id;
       editForm.elements.username.value = user.username;
       editForm.elements.password.value = '';
@@ -215,6 +229,7 @@
       modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
       editStatus.textContent = '';
       editForm.reset();
+      editForm.elements.password.required = true;
       editForm.elements.id.value = '';
       editModal.classList.remove('hidden');
       editModal.classList.add('flex');
@@ -238,12 +253,19 @@
       }
       if (deleteButton) {
         const id = Number(deleteButton.dataset.id);
-        const index = users.findIndex(item => item.id === id);
-        if (index >= 0) {
-          users.splice(index, 1);
-          applyFilters();
-          renderUsers(filteredUsers);
-        }
+        if (!confirm('ยืนยันการลบผู้ใช้นี้?')) return;
+        fetch(`${BASE_API}/users?id=${id}`, { method: 'DELETE' })
+          .then(res => res.json().catch(() => ({})).then(data => ({ res, data })))
+          .then(({ res, data }) => {
+            if (!res.ok) {
+              alert(data.error || 'ลบไม่สำเร็จ');
+              return;
+            }
+            fetchUsers();
+          })
+          .catch(() => {
+            alert('ลบไม่สำเร็จ');
+          });
       }
     });
 
@@ -251,31 +273,30 @@
       event.preventDefault();
       const formData = new FormData(editForm);
       const payload = Object.fromEntries(formData.entries());
-      if (isCreateMode) {
-        const nextId = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
-        users.push({
-          id: nextId,
-          username: payload.username,
-          full_name: payload.full_name,
-          email: payload.email,
-          role: payload.role,
+      const method = isCreateMode ? 'POST' : 'PUT';
+      if (!payload.password) delete payload.password;
+
+      fetch(`${BASE_API}/users`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(res => res.json().catch(() => ({})).then(data => ({ res, data })))
+        .then(({ res, data }) => {
+          if (!res.ok) {
+            editStatus.textContent = data.error || 'บันทึกไม่สำเร็จ';
+            editStatus.className = 'text-sm text-red-600';
+            return;
+          }
+          editStatus.textContent = isCreateMode ? 'เพิ่มผู้ใช้สำเร็จ' : 'บันทึกสำเร็จ';
+          editStatus.className = 'text-sm text-emerald-600';
+          closeModal();
+          fetchUsers();
+        })
+        .catch(() => {
+          editStatus.textContent = 'บันทึกไม่สำเร็จ';
+          editStatus.className = 'text-sm text-red-600';
         });
-        editStatus.textContent = 'เพิ่มผู้ใช้สำเร็จ';
-      } else {
-        const id = Number(payload.id);
-        const target = users.find(user => user.id === id);
-        if (target) {
-          target.username = payload.username;
-          target.full_name = payload.full_name;
-          target.email = payload.email;
-          target.role = payload.role;
-        }
-        editStatus.textContent = 'บันทึกสำเร็จ';
-      }
-      editStatus.className = 'text-sm text-emerald-600';
-      applyFilters();
-      renderUsers(filteredUsers);
-      closeModal();
     });
 
     closeEdit.addEventListener('click', closeModal);
@@ -286,10 +307,9 @@
 
     openCreate.addEventListener('click', openCreateModal);
 
-    applyFilters();
-    renderUsers(filteredUsers);
     requireAuth();
     renderAuthStatus();
+    fetchUsers();
   </script>
 </body>
 </html>

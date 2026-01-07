@@ -68,6 +68,20 @@ function read_json_body(): array
     return is_array($data) ? $data : [];
 }
 
+function get_request_id(): ?int
+{
+    if (isset($_GET['id'])) {
+        $id = (int) $_GET['id'];
+        return $id > 0 ? $id : null;
+    }
+    $payload = read_json_body();
+    if (isset($payload['id'])) {
+        $id = (int) $payload['id'];
+        return $id > 0 ? $id : null;
+    }
+    return null;
+}
+
 function normalize_header(string $value): string
 {
     $value = trim($value);
@@ -801,6 +815,124 @@ switch ($path) {
             'inserted' => $inserted,
             'skipped' => $skipped,
         ]);
+        break;
+
+    case '/api/users':
+        try {
+            $pdo = get_pdo();
+        } catch (Throwable $e) {
+            send_json(500, ['error' => 'Database error']);
+        }
+
+        if ($method === 'GET') {
+            try {
+                $stmt = $pdo->query('SELECT user_id AS id, username, full_name, email, `role`, status, created_at FROM users ORDER BY user_id DESC');
+                $users = $stmt->fetchAll();
+            } catch (Throwable $e) {
+                send_json(500, ['error' => 'Database error']);
+            }
+            send_json(200, ['data' => $users]);
+        }
+
+        if ($method === 'POST') {
+            $payload = read_json_body();
+            $required = ['username', 'password', 'full_name', 'email', 'role'];
+            foreach ($required as $field) {
+                if (empty($payload[$field])) {
+                    send_json(400, ['error' => 'Missing field: ' . $field]);
+                }
+            }
+            $passwordHash = password_hash((string) $payload['password'], PASSWORD_DEFAULT);
+            try {
+                $stmt = $pdo->prepare(
+                    'INSERT INTO users (username, password, full_name, email, `role`, status)
+                     VALUES (:username, :password, :full_name, :email, :role, :status)'
+                );
+                $stmt->execute([
+                    ':username' => $payload['username'],
+                    ':password' => $passwordHash,
+                    ':full_name' => $payload['full_name'],
+                    ':email' => $payload['email'],
+                    ':role' => $payload['role'],
+                    ':status' => 'active',
+                ]);
+            } catch (Throwable $e) {
+                send_json(500, ['error' => 'Database error']);
+            }
+            send_json(200, ['success' => true]);
+        }
+
+        if ($method === 'PUT') {
+            $payload = read_json_body();
+            $id = get_request_id();
+            if (!$id) {
+                send_json(400, ['error' => 'Missing id']);
+            }
+            $required = ['username', 'full_name', 'email', 'role'];
+            foreach ($required as $field) {
+                if (empty($payload[$field])) {
+                    send_json(400, ['error' => 'Missing field: ' . $field]);
+                }
+            }
+            $password = $payload['password'] ?? '';
+            try {
+                if ($password !== '') {
+                    $passwordHash = password_hash((string) $password, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare(
+                        'UPDATE users
+                         SET username = :username,
+                             password = :password,
+                             full_name = :full_name,
+                             email = :email,
+                             `role` = :role
+                         WHERE user_id = :id'
+                    );
+                    $stmt->execute([
+                        ':id' => $id,
+                        ':username' => $payload['username'],
+                        ':password' => $passwordHash,
+                        ':full_name' => $payload['full_name'],
+                        ':email' => $payload['email'],
+                        ':role' => $payload['role'],
+                    ]);
+                } else {
+                    $stmt = $pdo->prepare(
+                        'UPDATE users
+                         SET username = :username,
+                             full_name = :full_name,
+                             email = :email,
+                             `role` = :role
+                         WHERE user_id = :id'
+                    );
+                    $stmt->execute([
+                        ':id' => $id,
+                        ':username' => $payload['username'],
+                        ':full_name' => $payload['full_name'],
+                        ':email' => $payload['email'],
+                        ':role' => $payload['role'],
+                    ]);
+                }
+            } catch (Throwable $e) {
+                send_json(500, ['error' => 'Database error']);
+            }
+            send_json(200, ['success' => true]);
+        }
+
+        if ($method === 'DELETE') {
+            $id = get_request_id();
+            if (!$id) {
+                send_json(400, ['error' => 'Missing id']);
+            }
+            try {
+                $stmt = $pdo->prepare('DELETE FROM users WHERE user_id = :id');
+                $stmt->execute([':id' => $id]);
+            } catch (Throwable $e) {
+                send_json(500, ['error' => 'Database error']);
+            }
+            send_json(200, ['success' => true]);
+        }
+
+        send_json(405, ['error' => 'Method not allowed']);
         break;
 }
 
