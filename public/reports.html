@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLeave | รายงาน</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 10px 18px -14px rgba(0, 0, 0, 0.35); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+      <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-lg font-bold">SL</div>
+        <div>
+          <div class="text-lg font-bold leading-tight">StudyLeave</div>
+          <div class="text-xs text-slate-400">Manage leave &amp; finance</div>
+        </div>
+      </div>
+      <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
+          <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📊</span>
+            แดชบอร์ด
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
+          <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📥</span>
+            นำเข้าคำสั่ง (Import)
+          </a>
+          <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">👥</span>
+            ทะเบียนการลา
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
+          <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">💳</span>
+            ลาศึกษาต่อ
+          </a>
+          <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
+            <span class="text-xl">📄</span>
+            รายงาน
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">System</div>
+          <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">👥</span>
+            จัดการผู้ใช้
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen">
+      <!-- Top bar -->
+      <header class="h-16 bg-white shadow flex items-center justify-between px-6">
+        <div class="flex items-center gap-3 text-slate-500">
+          <button class="lg:hidden text-xl">☰</button>
+          <div class="flex items-center gap-2 text-sm">
+            <a href="index.html" class="text-slate-400 hover:text-slate-600">Home</a>
+            <span class="text-slate-300">/</span>
+            <span class="font-semibold text-slate-700">Reports</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-slate-500">
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white">
+            <span class="text-lg">👤</span>
+            <span id="auth-name" class="text-sm font-semibold text-slate-700">ผู้ใช้งาน</span>
+          </div>
+          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <main class="p-6 space-y-6">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">ระบบรายงาน (Reports)</h1>
+            <p class="text-sm text-slate-500">ข้อมูลสรุปและสถิติประจำปีงบประมาณ</p>
+          </div>
+          <button class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+            ปีงบประมาณ 2568 ▼
+          </button>
+        </div>
+
+        <!-- Status summary -->
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 space-y-4">
+          <div class="flex items-center gap-2 text-slate-700 font-semibold">
+            <span class="text-xl">✅</span>
+            สรุปจำนวนตามสถานะ
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <div class="text-sm text-slate-500">กำลังศึกษา</div>
+              <div id="status-active" class="text-2xl font-bold text-slate-900">—</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <div class="text-sm text-slate-500">รอดำเนินการ</div>
+              <div id="status-pending" class="text-2xl font-bold text-slate-900">—</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <div class="text-sm text-slate-500">จบการศึกษา</div>
+              <div id="status-completed" class="text-2xl font-bold text-slate-900">—</div>
+            </div>
+          </div>
+          <div id="report-updated" class="text-xs text-slate-400 text-right"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script>
+    const updatedEl = document.getElementById('report-updated');
+    const statusActiveEl = document.getElementById('status-active');
+    const statusPendingEl = document.getElementById('status-pending');
+    const statusCompletedEl = document.getElementById('status-completed');
+    const BASE_API = '/study-leave-web/index.php/api';
+
+    function setError(msg) {
+      statusActiveEl.textContent = '—';
+      statusPendingEl.textContent = '—';
+      statusCompletedEl.textContent = '—';
+    }
+
+    async function loadReports() {
+      statusActiveEl.textContent = '—';
+      statusPendingEl.textContent = '—';
+      statusCompletedEl.textContent = '—';
+      try {
+        const res = await fetch(`${BASE_API}/reports/summary`);
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.data) {
+          setError('เชื่อมต่อ API ไม่สำเร็จ');
+          return;
+        }
+
+        const data = payload.data;
+        const statuses = data.status_counts || {};
+        statusActiveEl.textContent = `${statuses.active ?? 0} คน`;
+        statusPendingEl.textContent = `${statuses.pending ?? 0} คน`;
+        statusCompletedEl.textContent = `${statuses.completed ?? 0} คน`;
+        updatedEl.textContent = `ข้อมูลอัปเดตเมื่อ ${new Date().toLocaleString('th-TH')}`;
+      } catch (err) {
+        setError('เชื่อมต่อ API ไม่สำเร็จ');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      renderAuthStatus();
+      loadReports();
+    });
+  </script>
+</body>
+</html>

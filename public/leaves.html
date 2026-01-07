@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLeave | ทะเบียนการลา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 10px 18px -14px rgba(0, 0, 0, 0.35); }
+    .badge { padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+      <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-lg font-bold">SL</div>
+        <div>
+          <div class="text-lg font-bold leading-tight">StudyLeave</div>
+          <div class="text-xs text-slate-400">Manage leave &amp; finance</div>
+        </div>
+      </div>
+      <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
+          <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📊</span>
+            แดชบอร์ด
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
+          <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📥</span>
+            นำเข้าคำสั่ง (Import)
+          </a>
+          <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
+            <span class="text-xl">👥</span>
+            ทะเบียนการลา
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
+          <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">⏸️</span>
+            ลาศึกษาต่อ
+          </a>
+          <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📈</span>
+            รายงาน
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">System</div>
+          <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">👥</span>
+            จัดการผู้ใช้
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen">
+      <!-- Top bar -->
+      <header class="h-16 bg-white shadow flex items-center justify-between px-6">
+        <div class="flex items-center gap-3 text-slate-500">
+          <button class="lg:hidden text-xl">☰</button>
+          <div class="flex items-center gap-2 text-sm">
+            <a href="index.html" class="text-slate-400 hover:text-slate-600">Home</a>
+            <span class="text-slate-300">/</span>
+            <span class="font-semibold text-slate-700">Leaves</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-slate-500">
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white">
+            <span class="text-lg">👤</span>
+            <span id="auth-name" class="text-sm font-semibold text-slate-700">ผู้ใช้งาน</span>
+          </div>
+          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <main class="p-6 space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">ทะเบียนการลาศึกษาต่อ (Study Leave Registry)</h1>
+            <p class="text-sm text-slate-500">ข้อมูลบุคลากรที่อยู่ระหว่างการลาและประวัติการลาย้อนหลัง</p>
+          </div>
+          <button id="open-create" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+            <span class="text-xl">＋</span>
+            ลงทะเบียนลาใหม่
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 space-y-4">
+          <div class="flex flex-col lg:flex-row gap-3">
+            <div class="flex-1">
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                <input id="search-input" type="text" placeholder="ค้นหาชื่อ, ตำแหน่ง หรือเลขคำสั่ง..." class="w-full pl-10 pr-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400">
+              </div>
+            </div>
+            <select id="status-filter" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
+              <option value="all" selected>ทั้งหมด</option>
+              <option value="active">กำลังศึกษา</option>
+              <option value="pending">รอดำเนินการ</option>
+              <option value="completed">จบการศึกษา</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div class="text-sm text-slate-600">
+            Show
+            <select id="page-size" class="mx-2 px-2 py-1 rounded-lg border border-slate-200">
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            entries
+          </div>
+          <div id="page-info" class="text-sm text-slate-500"></div>
+        </div>
+
+        <!-- Registry list -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 divide-y divide-slate-100" id="leaves-container">
+          <div class="px-6 py-3 grid grid-cols-12 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div class="col-span-4">ชื่อ-สกุล</div>
+            <div class="col-span-4">ประเภทการลา</div>
+            <div class="col-span-2 text-right">ระยะเวลาที่ลา</div>
+            <div class="col-span-1 text-right">เดือน</div>
+            <div class="col-span-1 text-right">สถานะ</div>
+          </div>
+        <div id="leaves-rows" class="divide-y divide-slate-100">
+          <div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>
+        </div>
+      </div>
+      </main>
+    </div>
+  </div>
+  <div id="create-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-slate-100">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-slate-900">ลงทะเบียนลาใหม่</h2>
+        <button id="close-create" class="text-slate-500 hover:text-slate-700">✕</button>
+      </div>
+      <form id="create-form" class="p-6 space-y-4">
+        <input type="hidden" name="id" id="edit-id">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="text-sm text-slate-600">
+            CID
+            <input name="cid" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            ชื่อ-สกุล
+            <input name="full_name" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            ตำแหน่ง/ส่วนราชการตาม จ.18
+            <input name="position_level" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            ตำแหน่งเลขที่
+            <input name="position_no" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            สถานที่ปฏิบัติงานจริง
+            <input name="workplace" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            หลักสูตร
+            <input name="program" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            หลักสูตร (ปี)
+            <input name="program_years" type="number" min="1" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            สถานที่ศึกษา
+            <input name="institute" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            เริ่มต้น (ว.ด.ป.)
+            <input name="start_date" type="date" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600">
+            สิ้นสุด (ว.ด.ป.)
+            <input name="end_date" type="date" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+          <label class="text-sm text-slate-600 md:col-span-2">
+            หมายเหตุ
+            <input name="note" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200">
+          </label>
+          <label class="text-sm text-slate-600 md:col-span-2">
+            เลขที่คำสั่ง
+            <input name="order_no" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+          </label>
+        </div>
+        <div class="flex items-center justify-between gap-3">
+          <div id="create-status" class="text-sm text-slate-500"></div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="cancel-create" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const leavesRows = document.getElementById('leaves-rows');
+    const BASE_API = '/study-leave-web/index.php/api';
+    const createModal = document.getElementById('create-modal');
+    const createForm = document.getElementById('create-form');
+    const createStatus = document.getElementById('create-status');
+    const openCreate = document.getElementById('open-create');
+    const closeCreate = document.getElementById('close-create');
+    const cancelCreate = document.getElementById('cancel-create');
+    const searchInput = document.getElementById('search-input');
+    const statusFilter = document.getElementById('status-filter');
+    const pageSizeSelect = document.getElementById('page-size');
+    const pageInfo = document.getElementById('page-info');
+    let allLeaves = [];
+    let filteredLeaves = [];
+    let currentPage = 1;
+    let isEditMode = false;
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('th-TH');
+    }
+
+    function statusBadge(status) {
+      const map = {
+        active: { text: 'กำลังศึกษา', class: 'bg-blue-100 text-blue-700 border border-blue-200' },
+        completed: { text: 'จบการศึกษา', class: 'bg-emerald-100 text-emerald-700 border border-emerald-200' },
+        pending: { text: 'รอดำเนินการ', class: 'bg-amber-100 text-amber-700 border border-amber-200' },
+      };
+      const cfg = map[status] || { text: status || '-', class: 'bg-slate-100 text-slate-700 border border-slate-200' };
+      return `<span class="badge ${cfg.class}">${cfg.text}</span>`;
+    }
+
+    function splitPosition(text) {
+      const raw = (text || '').trim();
+      if (!raw) return { title: '', detail: '' };
+      const parts = raw.split(/\r?\n+/).map(part => part.trim()).filter(Boolean);
+      if (parts.length <= 1) return { title: raw, detail: '' };
+      return { title: parts[0], detail: parts.slice(1).join(' ') };
+    }
+
+    function diffMonths(startDate, endDate) {
+      if (!startDate || !endDate) return '-';
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '-';
+      let months = (end.getFullYear() - start.getFullYear()) * 12;
+      months += end.getMonth() - start.getMonth();
+      if (end.getDate() >= start.getDate()) {
+        months += 1;
+      }
+      return months > 0 ? months : 0;
+    }
+
+    function renderLeaves(list) {
+      if (!list || !list.length) {
+        leavesRows.innerHTML = `<div class="px-6 py-6 text-sm text-slate-500">ไม่พบข้อมูล</div>`;
+        return;
+      }
+
+      leavesRows.innerHTML = list.map(item => {
+        const pos = splitPosition(item.position);
+        return `
+        <div class="leave-row px-6 py-4 grid grid-cols-12 items-center card-hover cursor-pointer" data-id="${item.id}">
+          <div class="col-span-4 min-w-0">
+            <div class="font-semibold text-slate-800">${item.full_name || '-'}</div>
+            <div class="text-sm text-slate-600 flex items-center gap-2 min-w-0">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 text-xs font-semibold whitespace-nowrap">${pos.title || '-'}</span>
+              ${pos.detail ? `<span class="text-slate-500 truncate" title="${pos.detail}">${pos.detail}</span>` : ''}
+            </div>
+          </div>
+          <div class="col-span-4 min-w-0">
+            <div class="font-semibold text-slate-800 truncate" title="${item.level || '-'}">${item.level || '-'}</div>
+            <div class="text-xs text-slate-500 whitespace-nowrap">${item.type || ''}</div>
+          </div>
+          <div class="col-span-2 text-sm text-slate-700 whitespace-nowrap text-right">
+            ${formatDate(item.start_date)} - ${formatDate(item.end_date)}
+          </div>
+          <div class="col-span-1 text-right font-semibold text-slate-900 whitespace-nowrap">
+            ${diffMonths(item.start_date, item.end_date)}
+          </div>
+          <div class="col-span-1 text-right whitespace-nowrap">
+            ${statusBadge(item.status)}
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
+
+    function renderPagination() {
+      const pageSize = Number(pageSizeSelect.value);
+      const total = filteredLeaves.length;
+      const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+      if (currentPage > totalPages) currentPage = totalPages;
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, total);
+
+      const pageItems = filteredLeaves.slice(startIndex, endIndex);
+      renderLeaves(pageItems);
+
+      const showing = total === 0 ? 0 : startIndex + 1;
+      pageInfo.textContent = `Showing ${showing} to ${endIndex} of ${total} entries`;
+
+      renderPagerControls(totalPages);
+    }
+
+    function renderPagerControls(totalPages) {
+      const existing = document.getElementById('pager');
+      if (existing) existing.remove();
+
+      const pager = document.createElement('div');
+      pager.id = 'pager';
+      pager.className = 'flex items-center justify-between bg-white rounded-xl p-4 shadow-sm border border-slate-100';
+
+      const left = document.createElement('div');
+      left.className = 'text-sm text-slate-500';
+      left.textContent = totalPages > 1 ? '' : '';
+      pager.appendChild(left);
+
+      const controls = document.createElement('div');
+      controls.className = 'flex items-center gap-2';
+
+      const prev = document.createElement('button');
+      prev.className = 'px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50';
+      prev.textContent = 'Previous';
+      prev.disabled = currentPage === 1;
+      prev.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage -= 1;
+          renderPagination();
+        }
+      });
+      controls.appendChild(prev);
+
+      for (let i = 1; i <= totalPages; i += 1) {
+        const btn = document.createElement('button');
+        btn.className = i === currentPage
+          ? 'px-3 py-2 rounded-lg bg-blue-600 text-white'
+          : 'px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50';
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+          currentPage = i;
+          renderPagination();
+        });
+        controls.appendChild(btn);
+      }
+
+      const next = document.createElement('button');
+      next.className = 'px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50';
+      next.textContent = 'Next';
+      next.disabled = currentPage === totalPages;
+      next.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage += 1;
+          renderPagination();
+        }
+      });
+      controls.appendChild(next);
+
+      pager.appendChild(controls);
+
+      const container = document.getElementById('leaves-container');
+      container.parentNode.insertBefore(pager, container.nextSibling);
+    }
+
+    function applyFilters() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const statusValue = statusFilter.value;
+
+      filteredLeaves = allLeaves.filter(item => {
+        const name = (item.full_name || '').toLowerCase();
+        const position = (item.position || '').toLowerCase();
+        const orderNo = (item.order_no || '').toLowerCase();
+        const matchesKeyword = !keyword || name.includes(keyword) || position.includes(keyword) || orderNo.includes(keyword);
+
+        const status = item.status || '';
+        const matchesStatus = statusValue === 'all' || status === statusValue;
+
+        return matchesKeyword && matchesStatus;
+      });
+    }
+
+    async function loadLeaves() {
+      leavesRows.innerHTML = `<div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>`;
+      try {
+        const res = await fetch(`${BASE_API}/leaves`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.data) {
+          leavesRows.innerHTML = `<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>`;
+          return;
+        }
+        allLeaves = data.data;
+        currentPage = 1;
+        applyFilters();
+        renderPagination();
+      } catch (err) {
+        leavesRows.innerHTML = `<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>`;
+      }
+    }
+
+    function openModal() {
+      createStatus.textContent = '';
+      document.getElementById('edit-id').value = '';
+      createModal.classList.remove('hidden');
+      createModal.classList.add('flex');
+    }
+
+    function closeModal() {
+      createModal.classList.add('hidden');
+      createModal.classList.remove('flex');
+      createForm.reset();
+      createStatus.textContent = '';
+      isEditMode = false;
+      document.querySelector('#create-form button[type="submit"]').textContent = 'บันทึก';
+      document.querySelector('#create-modal h2').textContent = 'ลงทะเบียนลาใหม่';
+    }
+
+    function openEditModal(item) {
+      isEditMode = true;
+      document.querySelector('#create-modal h2').textContent = 'แก้ไขการลา';
+      document.querySelector('#create-form button[type="submit"]').textContent = 'บันทึกการแก้ไข';
+      document.getElementById('edit-id').value = item.id;
+      createForm.elements.cid.value = item.cid || '';
+      createForm.elements.full_name.value = item.full_name || '';
+      createForm.elements.position_level.value = item.position_level || '';
+      createForm.elements.position_no.value = item.position_no || '';
+      createForm.elements.workplace.value = item.workplace || '';
+      createForm.elements.program.value = item.program || '';
+      createForm.elements.program_years.value = item.program_years || '';
+      createForm.elements.institute.value = item.institute || '';
+      createForm.elements.start_date.value = item.start_date || '';
+      createForm.elements.end_date.value = item.end_date || '';
+      createForm.elements.note.value = item.note || '';
+      createForm.elements.order_no.value = item.order_no || '';
+      createModal.classList.remove('hidden');
+      createModal.classList.add('flex');
+    }
+
+    openCreate.addEventListener('click', openModal);
+    closeCreate.addEventListener('click', closeModal);
+    cancelCreate.addEventListener('click', closeModal);
+    createModal.addEventListener('click', (e) => {
+      if (e.target === createModal) {
+        closeModal();
+      }
+    });
+
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      createStatus.textContent = 'กำลังบันทึก...';
+      try {
+        const formData = new FormData(createForm);
+        const payload = Object.fromEntries(formData.entries());
+        if (!payload.id) {
+          delete payload.id;
+        }
+
+        const res = await fetch(`${BASE_API}/leaves`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          createStatus.textContent = data.error || 'บันทึกไม่สำเร็จ';
+          createStatus.className = 'text-sm text-red-600';
+          return;
+        }
+
+        createStatus.textContent = isEditMode ? 'บันทึกการแก้ไขสำเร็จ' : 'บันทึกสำเร็จ';
+        createStatus.className = 'text-sm text-emerald-600';
+        closeModal();
+        loadLeaves();
+      } catch (err) {
+        createStatus.textContent = 'บันทึกไม่สำเร็จ';
+        createStatus.className = 'text-sm text-red-600';
+      }
+    });
+
+    pageSizeSelect.addEventListener('change', () => {
+      currentPage = 1;
+      renderPagination();
+    });
+
+    searchInput.addEventListener('input', () => {
+      currentPage = 1;
+      applyFilters();
+      renderPagination();
+    });
+
+    statusFilter.addEventListener('change', () => {
+      currentPage = 1;
+      applyFilters();
+      renderPagination();
+    });
+
+    leavesRows.addEventListener('click', (event) => {
+      const row = event.target.closest('.leave-row');
+      if (!row) return;
+      const id = Number(row.dataset.id);
+      if (!id) return;
+      const item = allLeaves.find(entry => entry.id === id);
+      if (item) {
+        openEditModal(item);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      renderAuthStatus();
+      loadLeaves();
+    });
+  </script>
+</body>
+</html>

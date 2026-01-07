@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLeave | จัดการผู้ใช้</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 10px 18px -14px rgba(0, 0, 0, 0.35); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+      <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
+        <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-lg font-bold">SL</div>
+        <div>
+          <div class="text-lg font-bold leading-tight">StudyLeave</div>
+          <div class="text-xs text-slate-400">Manage leave &amp; finance</div>
+        </div>
+      </div>
+      <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
+          <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📊</span>
+            แดชบอร์ด
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
+          <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📥</span>
+            นำเข้าคำสั่ง (Import)
+          </a>
+          <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📑</span>
+            ทะเบียนการลา
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
+          <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">⏸️</span>
+            ลาศึกษาต่อ
+          </a>
+          <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+            <span class="text-xl">📈</span>
+            รายงาน
+          </a>
+        </div>
+        <div>
+          <div class="text-xs uppercase text-slate-500 mb-2">System</div>
+          <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
+            <span class="text-xl">👥</span>
+            จัดการผู้ใช้
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen">
+      <!-- Top bar -->
+      <header class="h-16 bg-white shadow flex items-center justify-between px-6">
+        <div class="flex items-center gap-3 text-slate-500">
+          <button class="lg:hidden text-xl">☰</button>
+          <div class="flex items-center gap-2 text-sm">
+            <a href="index.html" class="text-slate-400 hover:text-slate-600">Home</a>
+            <span class="text-slate-300">/</span>
+            <span class="font-semibold text-slate-700">Users</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-slate-500">
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white">
+            <span class="text-lg">👤</span>
+            <span id="auth-name" class="text-sm font-semibold text-slate-700">ผู้ใช้งาน</span>
+          </div>
+          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <main class="p-6 space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+          <div class="flex items-center gap-2 text-slate-800">
+            <span class="text-2xl">👥</span>
+            <h1 class="text-2xl font-bold text-slate-900">จัดการผู้ใช้</h1>
+          </div>
+          <button id="open-create" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+            <span class="text-xl">＋</span>
+            เพิ่มผู้ใช้ใหม่
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 divide-y divide-slate-100">
+          <div class="px-6 py-3 grid grid-cols-12 text-xs font-semibold text-slate-500 uppercase tracking-wide bg-slate-50">
+            <div class="col-span-2">ชื่อผู้ใช้</div>
+            <div class="col-span-3">ชื่อ-นามสกุล</div>
+            <div class="col-span-4">อีเมล</div>
+            <div class="col-span-2">บทบาท</div>
+            <div class="col-span-1 text-center">การดำเนินการ</div>
+          </div>
+          <div id="users-rows" class="divide-y divide-slate-100">
+            <div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="edit-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xl rounded-2xl shadow-xl border border-slate-100">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <h2 id="modal-title" class="text-lg font-semibold text-slate-900">แก้ไขผู้ใช้</h2>
+        <button id="close-edit" class="text-slate-500 hover:text-slate-700">✕</button>
+      </div>
+      <form id="edit-form" class="p-6 space-y-4">
+        <input type="hidden" name="id" id="edit-id">
+        <label class="text-sm text-slate-600">
+          ชื่อผู้ใช้
+          <input name="username" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+        </label>
+        <label class="text-sm text-slate-600">
+          รหัสผ่าน (เว้นว่างหากไม่ต้องการเปลี่ยน)
+          <input name="password" type="password" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200">
+        </label>
+        <label class="text-sm text-slate-600">
+          ชื่อ-นามสกุล
+          <input name="full_name" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+        </label>
+        <label class="text-sm text-slate-600">
+          อีเมล
+          <input name="email" type="email" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+        </label>
+        <label class="text-sm text-slate-600">
+          บทบาท
+          <input name="role" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
+        </label>
+        <div class="flex items-center justify-between gap-3">
+          <div id="edit-status" class="text-sm text-slate-500"></div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="cancel-edit" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    const usersRows = document.getElementById('users-rows');
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const editStatus = document.getElementById('edit-status');
+    const closeEdit = document.getElementById('close-edit');
+    const cancelEdit = document.getElementById('cancel-edit');
+    const openCreate = document.getElementById('open-create');
+    const modalTitle = document.getElementById('modal-title');
+
+    const users = [
+      { id: 1, username: 'admin', full_name: 'ผู้ดูแลระบบ', email: 'admin@example.com', role: 'admin' },
+      { id: 2, username: 'staff01', full_name: 'เจ้าหน้าที่ ก', email: 'staff01@example.com', role: 'staff' },
+      { id: 3, username: 'viewer01', full_name: 'ผู้ตรวจสอบ ข', email: 'viewer01@example.com', role: 'viewer' },
+    ];
+
+    let filteredUsers = [...users];
+    let isCreateMode = false;
+
+    function renderUsers(list) {
+      if (!list.length) {
+        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">ไม่พบข้อมูล</div>';
+        return;
+      }
+
+      usersRows.innerHTML = list.map(user => `
+        <div class="px-6 py-4 grid grid-cols-12 items-center">
+          <div class="col-span-2 font-semibold text-slate-800">${user.username}</div>
+          <div class="col-span-3 text-slate-700">${user.full_name}</div>
+          <div class="col-span-4 text-slate-600">${user.email}</div>
+          <div class="col-span-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">${user.role}</span>
+          </div>
+          <div class="col-span-1 text-center flex items-center justify-center gap-2">
+            <button class="edit-btn w-8 h-8 rounded-md bg-amber-400 text-white hover:bg-amber-500 flex items-center justify-center" data-id="${user.id}" title="แก้ไข">✎</button>
+            <button class="delete-btn w-8 h-8 rounded-md bg-red-500 text-white hover:bg-red-600 flex items-center justify-center" data-id="${user.id}" title="ลบ">🗑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function applyFilters() {
+      filteredUsers = [...users];
+    }
+
+    function openEditModal(user) {
+      isCreateMode = false;
+      modalTitle.textContent = 'แก้ไขผู้ใช้';
+      editStatus.textContent = '';
+      editForm.elements.id.value = user.id;
+      editForm.elements.username.value = user.username;
+      editForm.elements.password.value = '';
+      editForm.elements.full_name.value = user.full_name;
+      editForm.elements.email.value = user.email;
+      editForm.elements.role.value = user.role;
+      editModal.classList.remove('hidden');
+      editModal.classList.add('flex');
+    }
+
+    function openCreateModal() {
+      isCreateMode = true;
+      modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
+      editStatus.textContent = '';
+      editForm.reset();
+      editForm.elements.id.value = '';
+      editModal.classList.remove('hidden');
+      editModal.classList.add('flex');
+    }
+
+    function closeModal() {
+      editModal.classList.add('hidden');
+      editModal.classList.remove('flex');
+      editForm.reset();
+      editStatus.textContent = '';
+    }
+
+    usersRows.addEventListener('click', (event) => {
+      const editButton = event.target.closest('.edit-btn');
+      const deleteButton = event.target.closest('.delete-btn');
+      if (editButton) {
+        const id = Number(editButton.dataset.id);
+        const user = users.find(item => item.id === id);
+        if (user) openEditModal(user);
+        return;
+      }
+      if (deleteButton) {
+        const id = Number(deleteButton.dataset.id);
+        const index = users.findIndex(item => item.id === id);
+        if (index >= 0) {
+          users.splice(index, 1);
+          applyFilters();
+          renderUsers(filteredUsers);
+        }
+      }
+    });
+
+    editForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(editForm);
+      const payload = Object.fromEntries(formData.entries());
+      if (isCreateMode) {
+        const nextId = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
+        users.push({
+          id: nextId,
+          username: payload.username,
+          full_name: payload.full_name,
+          email: payload.email,
+          role: payload.role,
+        });
+        editStatus.textContent = 'เพิ่มผู้ใช้สำเร็จ';
+      } else {
+        const id = Number(payload.id);
+        const target = users.find(user => user.id === id);
+        if (target) {
+          target.username = payload.username;
+          target.full_name = payload.full_name;
+          target.email = payload.email;
+          target.role = payload.role;
+        }
+        editStatus.textContent = 'บันทึกสำเร็จ';
+      }
+      editStatus.className = 'text-sm text-emerald-600';
+      applyFilters();
+      renderUsers(filteredUsers);
+      closeModal();
+    });
+
+    closeEdit.addEventListener('click', closeModal);
+    cancelEdit.addEventListener('click', closeModal);
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) closeModal();
+    });
+
+    openCreate.addEventListener('click', openCreateModal);
+
+    applyFilters();
+    renderUsers(filteredUsers);
+    requireAuth();
+    renderAuthStatus();
+  </script>
+</body>
+</html>
