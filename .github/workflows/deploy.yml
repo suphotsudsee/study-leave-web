@@ -1,0 +1,22 @@
+name: Deploy paymonth-nextjs on self-hosted server
+
+on:
+  push:
+    branches:
+      - main        # ถ้า deploy จาก branch อื่น เปลี่ยนตามจริง
+
+jobs:
+  deploy:
+    runs-on: self-hosted    # ใช้ runner ที่อยู่บน server เครื่องนี้
+
+    steps:
+      - name: Go to project folder
+        run: |
+          cd /home/phoubon-test-paymonth/htdocs/test-paymonth.phoubon.in.th
+          pwd
+          ls
+
+      - name: Git pull latest code
+        run: |
+          cd /home/phoubon-test-paymonth/htdocs/test-paymonth.phoubon.in.th
+          git pull origin main
