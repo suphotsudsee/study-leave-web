@@ -5,7 +5,9 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+$routes->get('/', static function () {
+    return redirect()->to('/index.html');
+});
 
 $routes->group('api', static function ($routes) {
     $routes->get('dashboard', 'Api::dashboard');
