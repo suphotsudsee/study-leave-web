@@ -6,7 +6,7 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', static function () {
-    return redirect()->to('/public/index.html');
+    return redirect()->to('/index.html');
 });
 
 $routes->group('api', static function ($routes) {
