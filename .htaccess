@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Serve the UI when accessing /index.html at the project root.
+    RewriteRule ^index\.html$ public/index.html [L]
+</IfModule>
