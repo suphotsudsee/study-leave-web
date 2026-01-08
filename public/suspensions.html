@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyLeave | รายการบุคลากรที่ลาศึกษาต่อ</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="sidebar.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -15,53 +16,7 @@
 <body class="bg-slate-100 text-slate-800">
   <div class="flex">
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
-      <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
-        <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-lg font-bold">SL</div>
-        <div>
-          <div class="text-lg font-bold leading-tight">StudyLeave</div>
-          <div class="text-xs text-slate-400">Manage leave &amp; finance</div>
-        </div>
-      </div>
-      <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
-          <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📊</span>
-            แดชบอร์ด
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
-          <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📥</span>
-            นำเข้าคำสั่ง (Import)
-          </a>
-          <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">👥</span>
-            ทะเบียนการลา
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
-          <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
-            <span class="text-xl">💳</span>
-            ลาศึกษาต่อ
-          </a>
-          <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📈</span>
-            รายงาน
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">System</div>
-          <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">👥</span>
-            จัดการผู้ใช้
-          </a>
-        </div>
-      </nav>
-    </aside>
+    <div id="sidebar-container"></div>
 
     <!-- Main content -->
     <div class="flex-1 min-h-screen">

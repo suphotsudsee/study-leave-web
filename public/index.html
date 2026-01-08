@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyLeave Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="sidebar.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -14,53 +15,7 @@
 <body class="bg-slate-100 text-slate-800">
   <div class="flex">
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-100 min-h-screen flex flex-col">
-      <div class="px-6 py-5 flex items-center gap-3 border-b border-slate-800">
-        <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white text-lg font-bold">SL</div>
-        <div>
-          <div class="text-lg font-bold leading-tight">StudyLeave</div>
-          <div class="text-xs text-slate-400">Manage leave &amp; finance</div>
-        </div>
-      </div>
-      <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
-          <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
-            <span class="text-xl">📊</span>
-            แดชบอร์ด
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
-          <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📥</span>
-            นำเข้าคำสั่ง (Import)
-          </a>
-          <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📑</span>
-            ทะเบียนการลา
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
-          <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">⏸️</span>
-            ลาศึกษาต่อ
-          </a>
-          <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">📈</span>
-            รายงาน
-          </a>
-        </div>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-2">System</div>
-          <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">👥</span>
-            จัดการผู้ใช้
-          </a>
-        </div>
-      </nav>
-    </aside>
+    <div id="sidebar-container"></div>
 
     <!-- Main content -->
     <div class="flex-1 min-h-screen">
@@ -99,48 +54,48 @@
 
         <!-- Stat cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover cursor-pointer" data-position-card="true" data-category="doctor" data-label="แพทย์" role="button" tabindex="0">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl">👤</div>
-              <span class="text-xs font-semibold text-blue-700">ตำแหน่งอันดับ 1</span>
+              <span class="text-xs font-semibold text-blue-700">ตำแหน่งแพทย์</span>
             </div>
-            <div id="pos-1-name" class="text-lg font-semibold text-slate-900">—</div>
-            <div class="text-slate-500 text-sm mt-1"><span id="pos-1-count">0</span> ราย</div>
+            <div class="text-lg font-semibold text-slate-900">แพทย์</div>
+            <div class="text-slate-500 text-sm mt-1"><span id="pos-doctor-count">0</span> ราย</div>
           </div>
 
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover cursor-pointer" data-position-card="true" data-category="dentist" data-label="ทันตแพทย์" role="button" tabindex="0">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl">👤</div>
-              <span class="text-xs font-semibold text-purple-700">ตำแหน่งอันดับ 2</span>
+              <span class="text-xs font-semibold text-purple-700">ตำแหน่งทันตแพทย์</span>
             </div>
-            <div id="pos-2-name" class="text-lg font-semibold text-slate-900">—</div>
-            <div class="text-slate-500 text-sm mt-1"><span id="pos-2-count">0</span> ราย</div>
+            <div class="text-lg font-semibold text-slate-900">ทันตแพทย์</div>
+            <div class="text-slate-500 text-sm mt-1"><span id="pos-dentist-count">0</span> ราย</div>
           </div>
 
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover cursor-pointer" data-position-card="true" data-category="pharmacist" data-label="เภสัชกร" role="button" tabindex="0">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl">👤</div>
-              <span class="text-xs font-semibold text-amber-600">ตำแหน่งอันดับ 3</span>
+              <span class="text-xs font-semibold text-amber-600">ตำแหน่งเภสัชกร</span>
             </div>
-            <div id="pos-3-name" class="text-lg font-semibold text-slate-900">—</div>
-            <div class="text-slate-500 text-sm mt-1"><span id="pos-3-count">0</span> ราย</div>
+            <div class="text-lg font-semibold text-slate-900">เภสัชกร</div>
+            <div class="text-slate-500 text-sm mt-1"><span id="pos-pharmacist-count">0</span> ราย</div>
           </div>
 
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover cursor-pointer" data-position-card="true" data-category="nurse" data-label="พยาบาล" role="button" tabindex="0">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl">👤</div>
-              <span class="text-xs font-semibold text-emerald-600">ตำแหน่งอันดับ 4</span>
+              <span class="text-xs font-semibold text-emerald-600">ตำแหน่งพยาบาล</span>
             </div>
-            <div id="pos-4-name" class="text-lg font-semibold text-slate-900">—</div>
-            <div class="text-slate-500 text-sm mt-1"><span id="pos-4-count">0</span> ราย</div>
+            <div class="text-lg font-semibold text-slate-900">พยาบาล</div>
+            <div class="text-slate-500 text-sm mt-1"><span id="pos-nurse-count">0</span> ราย</div>
           </div>
 
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 card-hover cursor-pointer" data-position-card="true" data-category="other" data-label="อื่นๆ" role="button" tabindex="0">
             <div class="flex items-center justify-between mb-2">
               <div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-2xl">👥</div>
               <span class="text-xs font-semibold text-slate-600">ตำแหน่งอื่นๆ</span>
             </div>
-            <div class="text-lg font-semibold text-slate-900">—</div>
+            <div class="text-lg font-semibold text-slate-900">อื่นๆ</div>
             <div class="text-slate-500 text-sm mt-1"><span id="pos-other-count">0</span> ราย</div>
           </div>
         </div>
@@ -158,30 +113,70 @@
       </main>
     </div>
   </div>
+  <div id="position-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-xl border border-slate-100">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-lg font-bold text-slate-800">รายการบุคลากรตามตำแหน่ง</h2>
+          <p id="position-detail-label" class="text-sm text-slate-400">ตำแหน่ง</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div id="position-detail-count" class="text-sm text-slate-500"></div>
+          <button id="position-modal-close" class="text-slate-500 hover:text-slate-700">✕</button>
+        </div>
+      </div>
+      <div class="px-6 py-3 grid grid-cols-12 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+        <div class="col-span-4">ชื่อ-สกุล</div>
+        <div class="col-span-3">ตำแหน่ง</div>
+        <div class="col-span-3">สถานที่ปฏิบัติงาน</div>
+        <div class="col-span-2 text-right">ช่วงเวลา</div>
+      </div>
+      <div id="position-rows" class="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
+        <div class="px-6 py-6 text-sm text-slate-500">เลือกตำแหน่งเพื่อดูข้อมูล</div>
+      </div>
+    </div>
+  </div>
   <script src="auth.js"></script>
   <script>
     const BASE_API = 'api';
     const statusFilter = document.getElementById('status-filter');
     const recentImportsEl = document.getElementById('recent-imports');
+    const positionModal = document.getElementById('position-modal');
+    const positionRowsEl = document.getElementById('position-rows');
+    const positionLabelEl = document.getElementById('position-detail-label');
+    const positionCountEl = document.getElementById('position-detail-count');
+    const positionModalClose = document.getElementById('position-modal-close');
+    const positionCards = Array.from(document.querySelectorAll('[data-position-card="true"]'));
+    const positionLabelMap = {
+      doctor: 'แพทย์',
+      dentist: 'ทันตแพทย์',
+      pharmacist: 'เภสัชกร',
+      nurse: 'พยาบาล',
+      other: 'อื่นๆ',
+    };
+    let activePositionCategory = 'doctor';
 
     function setDashboard(stat) {
-      const positions = Array.isArray(stat.top_positions) ? stat.top_positions : [];
-      const slots = [1, 2, 3, 4];
-      slots.forEach((slot, index) => {
-        const nameEl = document.getElementById(`pos-${slot}-name`);
-        const countEl = document.getElementById(`pos-${slot}-count`);
-        const item = positions[index];
-        if (item) {
-          nameEl.textContent = item.position;
-          countEl.textContent = item.count;
-        } else {
-          nameEl.textContent = '—';
-          countEl.textContent = '0';
-        }
-      });
+      const categories = stat.position_categories ?? {};
+      const doctorCountEl = document.getElementById('pos-doctor-count');
+      const dentistCountEl = document.getElementById('pos-dentist-count');
+      const pharmacistCountEl = document.getElementById('pos-pharmacist-count');
+      const nurseCountEl = document.getElementById('pos-nurse-count');
       const otherCountEl = document.getElementById('pos-other-count');
+      if (doctorCountEl) {
+        doctorCountEl.textContent = categories.doctor ?? 0;
+      }
+      if (dentistCountEl) {
+        dentistCountEl.textContent = categories.dentist ?? 0;
+      }
+      if (pharmacistCountEl) {
+        pharmacistCountEl.textContent = categories.pharmacist ?? 0;
+      }
+      if (nurseCountEl) {
+        nurseCountEl.textContent = categories.nurse ?? 0;
+      }
       if (otherCountEl) {
-        otherCountEl.textContent = stat.other_positions ?? 0;
+        otherCountEl.textContent = categories.other ?? 0;
       }
 
       const imports = Array.isArray(stat.recent_imports) ? stat.recent_imports : [];
@@ -209,18 +204,129 @@
     }
 
     function setDashboardError() {
-      const slots = [1, 2, 3, 4];
-      slots.forEach((slot) => {
-        const nameEl = document.getElementById(`pos-${slot}-name`);
-        const countEl = document.getElementById(`pos-${slot}-count`);
-        nameEl.textContent = 'เชื่อมต่อ API ไม่สำเร็จ';
-        countEl.textContent = '0';
+      const countIds = [
+        'pos-doctor-count',
+        'pos-dentist-count',
+        'pos-pharmacist-count',
+        'pos-nurse-count',
+        'pos-other-count',
+      ];
+      countIds.forEach((id) => {
+        const countEl = document.getElementById(id);
+        if (countEl) {
+          countEl.textContent = '0';
+        }
       });
-      const otherCountEl = document.getElementById('pos-other-count');
-      if (otherCountEl) {
-        otherCountEl.textContent = '0';
-      }
       recentImportsEl.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
+    }
+
+    function formatThaiDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleDateString('th-TH');
+    }
+
+    function formatStatusLabel(status) {
+      const map = {
+        active: 'กำลังศึกษา',
+        pending: 'รอดำเนินการ',
+        completed: 'จบการศึกษา',
+      };
+      return map[status] || '-';
+    }
+
+    function setActiveCard(category) {
+      positionCards.forEach((card) => {
+        if (card.dataset.category === category) {
+          card.classList.add('ring-2', 'ring-blue-200');
+        } else {
+          card.classList.remove('ring-2', 'ring-blue-200');
+        }
+      });
+    }
+
+    function openPositionModal() {
+      if (!positionModal) return;
+      positionModal.classList.remove('hidden');
+      positionModal.classList.add('flex');
+    }
+
+    function closePositionModal() {
+      if (!positionModal) return;
+      positionModal.classList.add('hidden');
+      positionModal.classList.remove('flex');
+    }
+
+    async function loadPositionDetails(category) {
+      activePositionCategory = category;
+      const label = positionLabelMap[category] || 'อื่นๆ';
+      if (positionLabelEl) {
+        positionLabelEl.textContent = `ตำแหน่ง${label}`;
+      }
+      if (positionCountEl) {
+        positionCountEl.textContent = 'กำลังโหลด...';
+      }
+      if (positionRowsEl) {
+        positionRowsEl.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>';
+      }
+      setActiveCard(category);
+      openPositionModal();
+
+      try {
+        const status = statusFilter.value;
+        const res = await fetch(`${BASE_API}/leaves?status=${encodeURIComponent(status)}&position_category=${encodeURIComponent(category)}`);
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !Array.isArray(payload.data)) {
+          if (positionRowsEl) {
+            positionRowsEl.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
+          }
+          if (positionCountEl) {
+            positionCountEl.textContent = '0 ราย';
+          }
+          return;
+        }
+
+        const list = payload.data;
+        if (positionCountEl) {
+          positionCountEl.textContent = `${list.length} ราย`;
+        }
+        if (!list.length) {
+          if (positionRowsEl) {
+            positionRowsEl.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">ไม่พบข้อมูล</div>';
+          }
+          return;
+        }
+
+        if (positionRowsEl) {
+          positionRowsEl.innerHTML = list.map(item => {
+            const startDate = formatThaiDate(item.start_date);
+            const endDate = formatThaiDate(item.end_date);
+            const statusLabel = formatStatusLabel(item.status);
+            return `
+              <div class="px-6 py-4 grid grid-cols-12 items-center">
+                <div class="col-span-4 min-w-0">
+                  <div class="font-semibold text-slate-800">${item.full_name || '-'}</div>
+                  <div class="text-xs text-slate-500">${item.order_no || '-'}</div>
+                </div>
+                <div class="col-span-3 text-sm text-slate-600">${item.position_level || '-'}</div>
+                <div class="col-span-3 text-sm text-slate-600">${item.workplace || '-'}</div>
+                <div class="col-span-2 text-right text-sm text-slate-600">
+                  <div>${startDate} - ${endDate}</div>
+                  <div class="text-xs text-slate-400">${statusLabel}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        if (positionRowsEl) {
+          positionRowsEl.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
+        }
+        if (positionCountEl) {
+          positionCountEl.textContent = '0 ราย';
+        }
+      }
     }
 
     async function loadDashboard() {
@@ -238,11 +344,37 @@
       }
     }
 
-    statusFilter.addEventListener('change', loadDashboard);
+    statusFilter.addEventListener('change', () => {
+      loadDashboard();
+      loadPositionDetails(activePositionCategory);
+    });
     document.addEventListener('DOMContentLoaded', () => {
       requireAuth();
       renderAuthStatus();
       loadDashboard();
+      if (positionCards.length) {
+        activePositionCategory = positionCards[0].dataset.category || 'doctor';
+      }
+      positionCards.forEach((card) => {
+        const category = card.dataset.category;
+        card.addEventListener('click', () => loadPositionDetails(category));
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            loadPositionDetails(category);
+          }
+        });
+      });
+      if (positionModalClose) {
+        positionModalClose.addEventListener('click', closePositionModal);
+      }
+      if (positionModal) {
+        positionModal.addEventListener('click', (event) => {
+          if (event.target === positionModal) {
+            closePositionModal();
+          }
+        });
+      }
     });
   </script>
   <footer class="mt-10 border-t border-slate-200 bg-white">

@@ -372,6 +372,34 @@ class Api extends BaseController
         return $normalized ?? $title;
     }
 
+    private function mapPositionCategory(string $position): string
+    {
+        $normalized = preg_replace('/\s+/u', '', mb_strtolower($position, 'UTF-8'));
+        if ($normalized === null || $normalized === '') {
+            return 'อื่นๆ';
+        }
+        if (mb_strpos($normalized, 'ทันตแพทย์') !== false || mb_strpos($normalized, 'ทันต') !== false) {
+            return 'ทันตแพทย์';
+        }
+        if (mb_strpos($normalized, 'เภสัช') !== false) {
+            return 'เภสัชกร';
+        }
+        if (mb_strpos($normalized, 'พยาบาล') !== false) {
+            return 'พยาบาล';
+        }
+        if (mb_strpos($normalized, 'แพทย์') !== false) {
+            return 'แพทย์';
+        }
+        return 'อื่นๆ';
+    }
+
+    private function getFiscalYear(DateTime $date): int
+    {
+        $year = (int) $date->format('Y');
+        $month = (int) $date->format('n');
+        return $month >= 10 ? $year + 1 : $year;
+    }
+
     public function dashboard(): ResponseInterface
     {
         try {
@@ -393,6 +421,13 @@ class Api extends BaseController
         $total = 0;
         $due = 0;
         $positionCounts = [];
+        $categoryCounts = [
+            'แพทย์' => 0,
+            'ทันตแพทย์' => 0,
+            'เภสัชกร' => 0,
+            'พยาบาล' => 0,
+            'อื่นๆ' => 0,
+        ];
 
         foreach ($rows as $row) {
             $status = $this->computeLeaveStatus($row['start_date'], $row['end_date']);
@@ -410,6 +445,9 @@ class Api extends BaseController
                 $positionCounts[$position] = 0;
             }
             $positionCounts[$position]++;
+
+            $category = $this->mapPositionCategory($position);
+            $categoryCounts[$category]++;
         }
 
         arsort($positionCounts);
@@ -432,6 +470,13 @@ class Api extends BaseController
                 'suspension_amount' => 0,
                 'top_positions' => $topPositions,
                 'other_positions' => $otherPositions,
+                'position_categories' => [
+                    'doctor' => $categoryCounts['แพทย์'],
+                    'dentist' => $categoryCounts['ทันตแพทย์'],
+                    'pharmacist' => $categoryCounts['เภสัชกร'],
+                    'nurse' => $categoryCounts['พยาบาล'],
+                    'other' => $categoryCounts['อื่นๆ'],
+                ],
                 'recent_imports' => $imports,
             ],
         ]);
@@ -511,9 +556,41 @@ class Api extends BaseController
             return $this->json(['error' => 'Database error'], 500);
         }
 
-        $data = array_map(function (array $row): array {
+        $statusFilter = $this->request->getGet('status') ?? 'all';
+        $allowedStatus = ['all', 'active', 'pending', 'completed'];
+        if (! in_array($statusFilter, $allowedStatus, true)) {
+            $statusFilter = 'all';
+        }
+
+        $positionCategory = strtolower((string) ($this->request->getGet('position_category') ?? 'all'));
+        $allowedCategories = ['all', 'doctor', 'dentist', 'pharmacist', 'nurse', 'other'];
+        if (! in_array($positionCategory, $allowedCategories, true)) {
+            $positionCategory = 'all';
+        }
+
+        $categoryMap = [
+            'แพทย์' => 'doctor',
+            'ทันตแพทย์' => 'dentist',
+            'เภสัชกร' => 'pharmacist',
+            'พยาบาล' => 'nurse',
+            'อื่นๆ' => 'other',
+        ];
+
+        $data = [];
+        foreach ($rows as $row) {
             $status = $this->computeLeaveStatus($row['start_date'], $row['end_date']);
-            return [
+            if ($statusFilter !== 'all' && $status !== $statusFilter) {
+                continue;
+            }
+
+            $positionTitle = $this->extractPositionTitle((string) ($row['position_level'] ?? ''));
+            $categoryLabel = $this->mapPositionCategory($positionTitle);
+            $categoryKey = $categoryMap[$categoryLabel] ?? 'other';
+            if ($positionCategory !== 'all' && $categoryKey !== $positionCategory) {
+                continue;
+            }
+
+            $data[] = [
                 'id' => (int) $row['id'],
                 'cid' => $row['cid'],
                 'position_level' => $row['position_level'],
@@ -525,6 +602,7 @@ class Api extends BaseController
                 'note' => $row['note'],
                 'full_name' => $row['full_name'],
                 'position' => $row['position_level'],
+                'position_category' => $categoryKey,
                 'order_no' => $row['order_no'],
                 'level' => $row['program'],
                 'type' => $row['program_years'] . ' ปี',
@@ -532,7 +610,7 @@ class Api extends BaseController
                 'end_date' => $row['end_date'],
                 'status' => $status,
             ];
-        }, $rows);
+        }
 
         return $this->json(['data' => $data]);
     }
@@ -546,7 +624,35 @@ class Api extends BaseController
             return $this->json(['error' => 'Database error'], 500);
         }
 
-        $total = count($rows);
+        $fiscalYears = [];
+        foreach ($rows as $row) {
+            if (empty($row['start_date'])) {
+                continue;
+            }
+            try {
+                $start = new DateTime($row['start_date']);
+            } catch (Throwable $e) {
+                continue;
+            }
+            $fiscalYears[] = $this->getFiscalYear($start) + 543;
+        }
+        $fiscalYears = array_values(array_unique($fiscalYears));
+        rsort($fiscalYears);
+
+        $requestedFiscalYear = (int) ($this->request->getGet('fiscal_year') ?? 0);
+        $currentFiscalYear = $this->getFiscalYear(new DateTime('today')) + 543;
+        if ($requestedFiscalYear <= 0) {
+            $requestedFiscalYear = $fiscalYears[0] ?? $currentFiscalYear;
+        }
+        if (! $fiscalYears) {
+            $fiscalYears = [$requestedFiscalYear];
+        }
+
+        $fiscalYearAd = $requestedFiscalYear - 543;
+        $rangeStart = new DateTime(($fiscalYearAd - 1) . '-10-01');
+        $rangeEnd = new DateTime($fiscalYearAd . '-09-30');
+
+        $total = 0;
         $full = 0;
         $part = 0;
         $due = 0;
@@ -559,6 +665,19 @@ class Api extends BaseController
         $dueLimit = (clone $now)->modify('+90 days');
 
         foreach ($rows as $row) {
+            if (empty($row['start_date'])) {
+                continue;
+            }
+            try {
+                $startDate = new DateTime($row['start_date']);
+            } catch (Throwable $e) {
+                continue;
+            }
+            if ($startDate < $rangeStart || $startDate > $rangeEnd) {
+                continue;
+            }
+
+            $total++;
             $programYears = (int) ($row['program_years'] ?? 0);
             if ($programYears >= 2) {
                 $full++;
@@ -588,6 +707,8 @@ class Api extends BaseController
                 'status_counts' => $statusCounts,
                 'due_reinstates' => $due,
                 'dept_stats' => [],
+                'fiscal_years' => $fiscalYears,
+                'selected_fiscal_year' => $requestedFiscalYear,
             ],
         ]);
     }
