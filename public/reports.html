@@ -101,11 +101,13 @@
         fiscalYearEl.innerHTML = '<option value="">ไม่พบปีงบประมาณ</option>';
         return;
       }
-      fiscalYearEl.innerHTML = years
-        .map((year) => `<option value="${year}">ปีงบประมาณ ${year}</option>`)
-        .join('');
+      const options = ['<option value="all">ปีงบทั้งหมด</option>']
+        .concat(years.map((year) => `<option value="${year}">ปีงบประมาณ ${year}</option>`));
+      fiscalYearEl.innerHTML = options.join('');
       if (selected) {
         fiscalYearEl.value = String(selected);
+      } else {
+        fiscalYearEl.value = 'all';
       }
     }
 

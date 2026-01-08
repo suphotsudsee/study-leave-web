@@ -639,18 +639,25 @@ class Api extends BaseController
         $fiscalYears = array_values(array_unique($fiscalYears));
         rsort($fiscalYears);
 
-        $requestedFiscalYear = (int) ($this->request->getGet('fiscal_year') ?? 0);
+        $requestedFiscalYearRaw = (string) ($this->request->getGet('fiscal_year') ?? '');
+        $requestedFiscalYear = (int) $requestedFiscalYearRaw;
         $currentFiscalYear = $this->getFiscalYear(new DateTime('today')) + 543;
-        if ($requestedFiscalYear <= 0) {
+        if ($requestedFiscalYearRaw === 'all') {
+            $requestedFiscalYear = 0;
+        } elseif ($requestedFiscalYear <= 0) {
             $requestedFiscalYear = $fiscalYears[0] ?? $currentFiscalYear;
         }
         if (! $fiscalYears) {
             $fiscalYears = [$requestedFiscalYear];
         }
 
-        $fiscalYearAd = $requestedFiscalYear - 543;
-        $rangeStart = new DateTime(($fiscalYearAd - 1) . '-10-01');
-        $rangeEnd = new DateTime($fiscalYearAd . '-09-30');
+        $rangeStart = null;
+        $rangeEnd = null;
+        if ($requestedFiscalYear > 0) {
+            $fiscalYearAd = $requestedFiscalYear - 543;
+            $rangeStart = new DateTime(($fiscalYearAd - 1) . '-10-01');
+            $rangeEnd = new DateTime($fiscalYearAd . '-09-30');
+        }
 
         $total = 0;
         $full = 0;
@@ -673,8 +680,10 @@ class Api extends BaseController
             } catch (Throwable $e) {
                 continue;
             }
-            if ($startDate < $rangeStart || $startDate > $rangeEnd) {
-                continue;
+            if ($rangeStart && $rangeEnd) {
+                if ($startDate < $rangeStart || $startDate > $rangeEnd) {
+                    continue;
+                }
             }
 
             $total++;
@@ -708,7 +717,7 @@ class Api extends BaseController
                 'due_reinstates' => $due,
                 'dept_stats' => [],
                 'fiscal_years' => $fiscalYears,
-                'selected_fiscal_year' => $requestedFiscalYear,
+                'selected_fiscal_year' => $requestedFiscalYear > 0 ? $requestedFiscalYear : 'all',
             ],
         ]);
     }
