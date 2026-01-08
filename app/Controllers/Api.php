@@ -605,6 +605,8 @@ class Api extends BaseController
         $skipped = 0;
         $duplicateCount = 0;
         $duplicates = [];
+        $skippedRows = [];
+        $skippedLimit = 200;
         $existingKeys = [];
         $seenKeys = [];
 
@@ -621,10 +623,19 @@ class Api extends BaseController
             $builder = $db->table('study_leaves');
             $dataRows = array_slice($rows, $dataStart);
             foreach ($dataRows as $offset => $row) {
+                $rowNumber = $dataStart + $offset + 1;
                 $cid = $this->getCell($row, $headerMap, 'cid');
                 $fullName = $this->getCell($row, $headerMap, 'full_name');
                 if ($cid === null && $fullName === null) {
                     $skipped++;
+                    if (count($skippedRows) < $skippedLimit) {
+                        $skippedRows[] = [
+                            'row' => $rowNumber,
+                            'reason' => 'missing cid and full_name',
+                            'cid' => $cid ?? '',
+                            'full_name' => $fullName ?? '',
+                        ];
+                    }
                     continue;
                 }
 
@@ -632,6 +643,16 @@ class Api extends BaseController
                 $endDate = $this->parseDateValue($this->getCell($row, $headerMap, 'end_date'));
                 if ($startDate === null || $endDate === null) {
                     $skipped++;
+                    if (count($skippedRows) < $skippedLimit) {
+                        $skippedRows[] = [
+                            'row' => $rowNumber,
+                            'reason' => 'invalid start/end date',
+                            'cid' => $cid ?? '',
+                            'full_name' => $fullName ?? '',
+                            'start_date' => $this->getCell($row, $headerMap, 'start_date'),
+                            'end_date' => $this->getCell($row, $headerMap, 'end_date'),
+                        ];
+                    }
                     continue;
                 }
 
@@ -652,7 +673,19 @@ class Api extends BaseController
                     $skipped++;
                     if (count($duplicates) < 20) {
                         $duplicates[] = [
-                            'row' => $dataStart + $offset + 1,
+                            'row' => $rowNumber,
+                            'cid' => $cid ?? '',
+                            'full_name' => $fullName ?? '',
+                            'order_no' => $orderNo,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'source' => isset($existingKeys[$key]) ? 'existing' : 'file',
+                        ];
+                    }
+                    if (count($skippedRows) < $skippedLimit) {
+                        $skippedRows[] = [
+                            'row' => $rowNumber,
+                            'reason' => 'duplicate',
                             'cid' => $cid ?? '',
                             'full_name' => $fullName ?? '',
                             'order_no' => $orderNo,
@@ -707,6 +740,7 @@ class Api extends BaseController
             'skipped' => $skipped,
             'duplicate_count' => $duplicateCount,
             'duplicates' => $duplicates,
+            'skipped_rows' => $skippedRows,
         ]);
     }
 
