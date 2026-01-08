@@ -52,6 +52,44 @@ class Api extends BaseController
         return $dt->format('Y-m-d');
     }
 
+    private function replaceThaiMonths(string $value): string
+    {
+        $monthMap = [
+            'ม\\.ค\\.?|มกราคม' => '1',
+            'ก\\.พ\\.?|กุมภาพันธ์' => '2',
+            'มี\\.ค\\.?|มีนาคม' => '3',
+            'เม\\.ย\\.?|เมษายน' => '4',
+            'พ\\.ค\\.?|พฤษภาคม' => '5',
+            'มิ\\.ย\\.?|มิถุนายน' => '6',
+            'ก\\.ค\\.?|กรกฎาคม' => '7',
+            'ส\\.ค\\.?|สิงหาคม' => '8',
+            'ก\\.ย\\.?|กันยายน' => '9',
+            'ต\\.ค\\.?|ตุลาคม' => '10',
+            'พ\\.ย\\.?|พฤศจิกายน' => '11',
+            'ธ\\.ค\\.?|ธันวาคม' => '12',
+        ];
+
+        foreach ($monthMap as $pattern => $month) {
+            $value = preg_replace('/' . $pattern . '/u', $month, $value);
+        }
+
+        return $value;
+    }
+
+    private function looksLikeDateCandidate(string $value): bool
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return false;
+        }
+
+        if (is_numeric($trimmed)) {
+            return (int) $trimmed >= 20000;
+        }
+
+        return preg_match('/[\\/-]|[ก-ฮ]/u', $trimmed) === 1;
+    }
+
     private function parseDateValue($value): ?string
     {
         if ($value === null || $value === '') {
@@ -63,8 +101,22 @@ class Api extends BaseController
         }
 
         $value = trim((string) $value);
+        $value = strtr($value, [
+            '๐' => '0',
+            '๑' => '1',
+            '๒' => '2',
+            '๓' => '3',
+            '๔' => '4',
+            '๕' => '5',
+            '๖' => '6',
+            '๗' => '7',
+            '๘' => '8',
+            '๙' => '9',
+        ]);
         $value = str_replace(['.', '\\'], ['/', '/'], $value);
         $value = preg_replace('/\s+/', ' ', $value);
+        $value = $this->replaceThaiMonths($value);
+        $value = preg_replace('/\s+/', '/', $value);
 
         $dt = DateTime::createFromFormat('d/m/Y', $value);
         if ($dt instanceof DateTime) {
@@ -231,6 +283,7 @@ class Api extends BaseController
             'ตั้งแต่วดป' => 'start_date',
             'สิ้นสุดวด้ป' => 'end_date',
             'ถึงวดป' => 'end_date',
+            'ปีที่ขออนุมัติ' => 'approval_year',
             'หมายเหตุ' => 'note',
             'โควตา' => 'note',
             'เลขที่คำสั่ง' => 'order_no',
@@ -641,6 +694,14 @@ class Api extends BaseController
 
                 $startDate = $this->parseDateValue($this->getCell($row, $headerMap, 'start_date'));
                 $endDate = $this->parseDateValue($this->getCell($row, $headerMap, 'end_date'));
+                $approvalDate = null;
+                $approvalValue = $this->getCell($row, $headerMap, 'approval_year');
+                if ($approvalValue !== null && $this->looksLikeDateCandidate($approvalValue)) {
+                    $approvalDate = $this->parseDateValue($approvalValue);
+                }
+                if ($approvalDate !== null && ($endDate === null || ($startDate !== null && $endDate <= $startDate && $approvalDate >= $startDate))) {
+                    $endDate = $approvalDate;
+                }
                 if ($startDate === null || $endDate === null) {
                     $skipped++;
                     if (count($skippedRows) < $skippedLimit) {
@@ -651,6 +712,7 @@ class Api extends BaseController
                             'full_name' => $fullName ?? '',
                             'start_date' => $this->getCell($row, $headerMap, 'start_date'),
                             'end_date' => $this->getCell($row, $headerMap, 'end_date'),
+                            'approval_year' => $approvalValue ?? '',
                         ];
                     }
                     continue;
