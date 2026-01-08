@@ -162,6 +162,7 @@
         } else {
           const duplicates = Array.isArray(data.duplicates) ? data.duplicates : [];
           const duplicateCount = data.duplicate_count ?? 0;
+          const skippedRows = Array.isArray(data.skipped_rows) ? data.skipped_rows : [];
           const duplicateHtml = duplicates.length ? `
             <div class="mt-2 text-sm text-slate-600">
               <div class="font-semibold text-slate-700">รายการซ้ำ (แสดงสูงสุด 20)</div>
@@ -175,6 +176,18 @@
               </ul>
             </div>
           ` : '';
+          const skippedHtml = skippedRows.length ? `
+            <div class="mt-2 text-sm text-slate-600">
+              <div class="font-semibold text-slate-700">รายการที่ข้าม (แสดงสูงสุด 200)</div>
+              <ul class="list-disc pl-5 space-y-1">
+                ${skippedRows.map(item => `
+                  <li>
+                    แถว ${item.row ?? '-'}: ${item.full_name || '-'} (${item.cid || '-'}) - ${item.reason || '-'}
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+          ` : '';
           statusBox.innerHTML = `
             ✅ นำเข้าข้อมูลสำเร็จ<br>
             ชื่อไฟล์เดิม: ${data.originalName || file.name}<br>
@@ -182,6 +195,7 @@
             ข้าม: ${data.skipped || 0}<br>
             ซ้ำ: ${duplicateCount}
             ${duplicateHtml}
+            ${skippedHtml}
           `;
           statusBox.className = 'mt-3 text-sm text-emerald-700';
           fileInput.value = '';
