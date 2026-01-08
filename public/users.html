@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StudyLeave | ????????????????????????????????????</title>
+  <title>StudyLeave | จัดการผู้ใช้</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -26,37 +26,37 @@
         <div>
           <div class="text-xs uppercase text-slate-500 mb-2">Main</div>
           <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">????</span>
-            ????????????????????????
+            <span class="text-xl">📊</span>
+            แดชบอร์ด
           </a>
         </div>
         <div>
           <div class="text-xs uppercase text-slate-500 mb-2">Operation</div>
           <a href="import.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">????</span>
-            ???????????????????????????????????? (Import)
+            <span class="text-xl">📥</span>
+            นำเข้าคำสั่ง (Import)
           </a>
           <a href="leaves.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">????</span>
-            ????????????????????????????????????
+            <span class="text-xl">📑</span>
+            ทะเบียนการลา
           </a>
         </div>
         <div>
           <div class="text-xs uppercase text-slate-500 mb-2">Finance</div>
           <a href="suspensions.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">??????</span>
-            ??????????????????????????????
+            <span class="text-xl">⏸️</span>
+            ลาศึกษาต่อ
           </a>
           <a href="reports.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-            <span class="text-xl">????</span>
-            ??????????????????
+            <span class="text-xl">📈</span>
+            รายงาน
           </a>
         </div>
         <div>
           <div class="text-xs uppercase text-slate-500 mb-2">System</div>
           <a href="users.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold">
-            <span class="text-xl">????</span>
-            ????????????????????????????????????
+            <span class="text-xl">👥</span>
+            จัดการผู้ใช้
           </a>
         </div>
       </nav>
@@ -67,7 +67,7 @@
       <!-- Top bar -->
       <header class="h-16 bg-white shadow flex items-center justify-between px-6">
         <div class="flex items-center gap-3 text-slate-500">
-          <button class="lg:hidden text-xl">???</button>
+          <button class="lg:hidden text-xl">☰</button>
           <div class="flex items-center gap-2 text-sm">
             <a href="index.html" class="text-slate-400 hover:text-slate-600">Home</a>
             <span class="text-slate-300">/</span>
@@ -76,35 +76,35 @@
         </div>
         <div class="flex items-center gap-3 text-slate-500">
           <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white">
-            <span class="text-lg">????</span>
-            <span id="auth-name" class="text-sm font-semibold text-slate-700">???????????????????????????</span>
+            <span class="text-lg">👤</span>
+            <span id="auth-name" class="text-sm font-semibold text-slate-700">ผู้ใช้งาน</span>
           </div>
-          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">??????????????????????????????</button>
+          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">ออกจากระบบ</button>
         </div>
       </header>
 
       <main class="p-6 space-y-6">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200">
           <div class="flex items-center gap-2 text-slate-800">
-            <span class="text-2xl">????</span>
-            <h1 class="text-2xl font-bold text-slate-900">????????????????????????????????????</h1>
+            <span class="text-2xl">👥</span>
+            <h1 class="text-2xl font-bold text-slate-900">จัดการผู้ใช้</h1>
           </div>
           <button id="open-create" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
-            <span class="text-xl">???</span>
-            ?????????????????????????????????????????????
+            <span class="text-xl">＋</span>
+            เพิ่มผู้ใช้ใหม่
           </button>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 divide-y divide-slate-100">
           <div class="px-6 py-3 grid grid-cols-12 text-xs font-semibold text-slate-500 uppercase tracking-wide bg-slate-50">
-            <div class="col-span-2">??????????????????????????????</div>
-            <div class="col-span-3">????????????-?????????????????????</div>
-            <div class="col-span-4">???????????????</div>
-            <div class="col-span-2">???????????????</div>
-            <div class="col-span-1 text-center">????????????????????????????????????</div>
+            <div class="col-span-2">ชื่อผู้ใช้</div>
+            <div class="col-span-3">ชื่อ-นามสกุล</div>
+            <div class="col-span-4">อีเมล</div>
+            <div class="col-span-2">บทบาท</div>
+            <div class="col-span-1 text-center">การดำเนินการ</div>
           </div>
           <div id="users-rows" class="divide-y divide-slate-100">
-            <div class="px-6 py-6 text-sm text-slate-500">?????????????????????????????????????????????...</div>
+            <div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>
           </div>
         </div>
       </main>
@@ -114,36 +114,36 @@
   <div id="edit-modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4">
     <div class="bg-white w-full max-w-xl rounded-2xl shadow-xl border border-slate-100">
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h2 id="modal-title" class="text-lg font-semibold text-slate-900">?????????????????????????????????</h2>
-        <button id="close-edit" class="text-slate-500 hover:text-slate-700">???</button>
+        <h2 id="modal-title" class="text-lg font-semibold text-slate-900">แก้ไขผู้ใช้</h2>
+        <button id="close-edit" class="text-slate-500 hover:text-slate-700">✕</button>
       </div>
       <form id="edit-form" class="p-6 space-y-4">
         <input type="hidden" name="id" id="edit-id">
         <label class="text-sm text-slate-600">
-          ??????????????????????????????
+          ชื่อผู้ใช้
           <input name="username" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
         </label>
         <label class="text-sm text-slate-600">
-          ???????????????????????? (????????????????????????????????????????????????????????????????????????????????????)
+          รหัสผ่าน (เว้นว่างหากไม่ต้องการเปลี่ยน)
           <input name="password" type="password" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200">
         </label>
         <label class="text-sm text-slate-600">
-          ????????????-?????????????????????
+          ชื่อ-นามสกุล
           <input name="full_name" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
         </label>
         <label class="text-sm text-slate-600">
-          ???????????????
+          อีเมล
           <input name="email" type="email" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
         </label>
         <label class="text-sm text-slate-600">
-          ???????????????
+          บทบาท
           <input name="role" type="text" class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200" required>
         </label>
         <div class="flex items-center justify-between gap-3">
           <div id="edit-status" class="text-sm text-slate-500"></div>
           <div class="flex items-center gap-2">
-            <button type="button" id="cancel-edit" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">??????????????????</button>
-            <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">??????????????????</button>
+            <button type="button" id="cancel-edit" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+            <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">บันทึก</button>
           </div>
         </div>
       </form>
@@ -161,14 +161,14 @@
     const openCreate = document.getElementById('open-create');
     const modalTitle = document.getElementById('modal-title');
 
-    const BASE_API = 'api';
+    const BASE_API = '/study-leave-web/index.php/api';
     let users = [];
     let filteredUsers = [];
     let isCreateMode = false;
 
     function renderUsers(list) {
       if (!list.length) {
-        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">?????????????????????????????????</div>';
+        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">ไม่พบข้อมูล</div>';
         return;
       }
 
@@ -181,8 +181,8 @@
             <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold">${user.role}</span>
           </div>
           <div class="col-span-1 text-center flex items-center justify-center gap-2">
-            <button class="edit-btn w-8 h-8 rounded-md bg-amber-400 text-white hover:bg-amber-500 flex items-center justify-center" data-id="${user.id}" title="???????????????">???</button>
-            <button class="delete-btn w-8 h-8 rounded-md bg-red-500 text-white hover:bg-red-600 flex items-center justify-center" data-id="${user.id}" title="??????">????</button>
+            <button class="edit-btn w-8 h-8 rounded-md bg-amber-400 text-white hover:bg-amber-500 flex items-center justify-center" data-id="${user.id}" title="แก้ไข">✎</button>
+            <button class="delete-btn w-8 h-8 rounded-md bg-red-500 text-white hover:bg-red-600 flex items-center justify-center" data-id="${user.id}" title="ลบ">🗑</button>
           </div>
         </div>
       `).join('');
@@ -193,25 +193,25 @@
     }
 
     async function fetchUsers() {
-      usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">?????????????????????????????????????????????...</div>';
+      usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-slate-500">กำลังโหลดข้อมูล...</div>';
       try {
         const res = await fetch(`${BASE_API}/users`);
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.data) {
-          usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">??????????????????????????? API ???????????????????????????</div>';
+          usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
           return;
         }
         users = data.data;
         applyFilters();
         renderUsers(filteredUsers);
       } catch (err) {
-        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">??????????????????????????? API ???????????????????????????</div>';
+        usersRows.innerHTML = '<div class="px-6 py-6 text-sm text-red-600">เชื่อมต่อ API ไม่สำเร็จ</div>';
       }
     }
 
     function openEditModal(user) {
       isCreateMode = false;
-      modalTitle.textContent = '?????????????????????????????????';
+      modalTitle.textContent = 'แก้ไขผู้ใช้';
       editStatus.textContent = '';
       editForm.elements.password.required = false;
       editForm.elements.id.value = user.id;
@@ -226,7 +226,7 @@
 
     function openCreateModal() {
       isCreateMode = true;
-      modalTitle.textContent = '?????????????????????????????????????????????';
+      modalTitle.textContent = 'เพิ่มผู้ใช้ใหม่';
       editStatus.textContent = '';
       editForm.reset();
       editForm.elements.password.required = true;
@@ -253,18 +253,18 @@
       }
       if (deleteButton) {
         const id = Number(deleteButton.dataset.id);
-        if (!confirm('?????????????????????????????????????????????????????????????')) return;
+        if (!confirm('ยืนยันการลบผู้ใช้นี้?')) return;
         fetch(`${BASE_API}/users?id=${id}`, { method: 'DELETE' })
           .then(res => res.json().catch(() => ({})).then(data => ({ res, data })))
           .then(({ res, data }) => {
             if (!res.ok) {
-              alert(data.error || '?????????????????????????????????');
+              alert(data.error || 'ลบไม่สำเร็จ');
               return;
             }
             fetchUsers();
           })
           .catch(() => {
-            alert('?????????????????????????????????');
+            alert('ลบไม่สำเร็จ');
           });
       }
     });
@@ -284,17 +284,17 @@
         .then(res => res.json().catch(() => ({})).then(data => ({ res, data })))
         .then(({ res, data }) => {
           if (!res.ok) {
-            editStatus.textContent = data.error || '?????????????????????????????????????????????';
+            editStatus.textContent = data.error || 'บันทึกไม่สำเร็จ';
             editStatus.className = 'text-sm text-red-600';
             return;
           }
-          editStatus.textContent = isCreateMode ? '???????????????????????????????????????????????????' : '????????????????????????????????????';
+          editStatus.textContent = isCreateMode ? 'เพิ่มผู้ใช้สำเร็จ' : 'บันทึกสำเร็จ';
           editStatus.className = 'text-sm text-emerald-600';
           closeModal();
           fetchUsers();
         })
         .catch(() => {
-          editStatus.textContent = '?????????????????????????????????????????????';
+          editStatus.textContent = 'บันทึกไม่สำเร็จ';
           editStatus.className = 'text-sm text-red-600';
         });
     });
