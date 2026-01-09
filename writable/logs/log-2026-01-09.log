@@ -1,0 +1,22 @@
+ERROR - 2026-01-09 02:04:41 --> Error connecting to the database: mysqli_sql_exception: No connection could be made because the target machine actively refused it in C:\xampp\htdocs\study-leave-web\system\Database\MySQLi\Connection.php:184
+Stack trace:
+#0 C:\xampp\htdocs\study-leave-web\system\Database\MySQLi\Connection.php(184): mysqli->real_connect('localhost', 'root', Object(SensitiveParameterValue), 'slms', 3306, '', 0)
+#1 C:\xampp\htdocs\study-leave-web\system\Database\BaseConnection.php(392): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#2 C:\xampp\htdocs\study-leave-web\system\Database\BaseConnection.php(575): CodeIgniter\Database\BaseConnection->initialize()
+#3 C:\xampp\htdocs\study-leave-web\app\Controllers\Api.php(631): CodeIgniter\Database\BaseConnection->query('SELECT * FROM s...')
+#4 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(943): App\Controllers\Api->leaves()
+#5 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(503): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Api))
+#6 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(361): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#7 C:\xampp\htdocs\study-leave-web\public\index.php(91): CodeIgniter\CodeIgniter->run()
+#8 {main}
+
+Next CodeIgniter\Database\Exceptions\DatabaseException: No connection could be made because the target machine actively refused it in C:\xampp\htdocs\study-leave-web\system\Database\MySQLi\Connection.php:229
+Stack trace:
+#0 C:\xampp\htdocs\study-leave-web\system\Database\BaseConnection.php(392): CodeIgniter\Database\MySQLi\Connection->connect(false)
+#1 C:\xampp\htdocs\study-leave-web\system\Database\BaseConnection.php(575): CodeIgniter\Database\BaseConnection->initialize()
+#2 C:\xampp\htdocs\study-leave-web\app\Controllers\Api.php(631): CodeIgniter\Database\BaseConnection->query('SELECT * FROM s...')
+#3 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(943): App\Controllers\Api->leaves()
+#4 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(503): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Api))
+#5 C:\xampp\htdocs\study-leave-web\system\CodeIgniter.php(361): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#6 C:\xampp\htdocs\study-leave-web\public\index.php(91): CodeIgniter\CodeIgniter->run()
+#7 {main}

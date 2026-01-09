@@ -138,12 +138,27 @@
       return months > 0 ? months : 0;
     }
 
-    function splitPosition(text) {
-      const raw = (text || '').trim();
-      if (!raw) return { title: '', detail: '' };
-      const parts = raw.split(/\r?\n+/).map(part => part.trim()).filter(Boolean);
-      if (parts.length <= 1) return { title: raw, detail: '' };
-      return { title: parts[0], detail: parts.slice(1).join(' ') };
+    function getPositionParts(item) {
+      const title = (item.position_title || '').trim();
+      const hospital = (item.position_hospital || '').trim();
+      const office = (item.position_office || '').trim();
+      if (title || hospital || office) {
+        return { title, hospital, office };
+      }
+      const raw = (item.position_level || item.position || '').trim();
+      if (!raw) return { title: '', hospital: '', office: '' };
+      const tokens = raw.split(/\s+/).filter(Boolean);
+      if (tokens.length >= 3) {
+        return {
+          title: tokens.slice(0, -2).join(' '),
+          hospital: tokens[tokens.length - 2],
+          office: tokens[tokens.length - 1],
+        };
+      }
+      if (tokens.length === 2) {
+        return { title: tokens[0], hospital: tokens[1], office: '' };
+      }
+      return { title: raw, hospital: '', office: '' };
     }
 
     function renderSuspensions(list) {
@@ -153,14 +168,15 @@
       }
 
       suspRows.innerHTML = list.map(item => {
-        const pos = splitPosition(item.position);
+        const pos = getPositionParts(item);
         return `
         <div class="px-6 py-4 grid grid-cols-12 items-center card-hover">
           <div class="col-span-4 min-w-0">
             <div class="font-semibold text-slate-800">${item.full_name || '-'}</div>
-            <div class="text-sm text-slate-600 flex items-center gap-2 min-w-0">
+            <div class="text-sm text-slate-600 flex flex-wrap items-center gap-2 min-w-0">
               <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 text-xs font-semibold whitespace-nowrap">${pos.title || '-'}</span>
-              ${pos.detail ? `<span class="text-slate-500 truncate" title="${pos.detail}">${pos.detail}</span>` : ''}
+              ${pos.hospital ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100 text-xs font-semibold whitespace-nowrap">${pos.hospital}</span>` : ''}
+              ${pos.office ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-semibold whitespace-nowrap">${pos.office}</span>` : ''}
             </div>
           </div>
           <div class="col-span-4 min-w-0">
@@ -289,7 +305,10 @@
 
       filteredLeaves = allLeaves.filter(item => {
         const name = (item.full_name || '').toLowerCase();
-        const position = (item.position || '').toLowerCase();
+        const position = [item.position_title, item.position_hospital, item.position_office, item.position_level, item.position]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
         const matchesKeyword = !keyword || name.includes(keyword) || position.includes(keyword);
 
         const fy = getFiscalYear(item.start_date);

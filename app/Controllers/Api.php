@@ -146,77 +146,18 @@ class Api extends BaseController
         return $index - 1;
     }
 
-    private function readXlsxRows(string $filePath): array
+    private function readXlsxSheetRows(ZipArchive $zip, string $sheetPath, array $sharedStrings): array
     {
-        if (! class_exists(ZipArchive::class)) {
-            throw new RuntimeException('ZIP extension not available');
-        }
-
-        $zip = new ZipArchive();
-        if ($zip->open($filePath) !== true) {
-            throw new RuntimeException('Unable to open xlsx file');
-        }
-
-        $sharedStrings = [];
-        $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
-        if ($sharedXml !== false) {
-            libxml_use_internal_errors(true);
-            $shared = simplexml_load_string($sharedXml);
-            libxml_clear_errors();
-            if ($shared && isset($shared->si)) {
-                foreach ($shared->si as $si) {
-                    if (isset($si->t)) {
-                        $sharedStrings[] = (string) $si->t;
-                    } elseif (isset($si->r)) {
-                        $text = '';
-                        foreach ($si->r as $run) {
-                            $text .= (string) $run->t;
-                        }
-                        $sharedStrings[] = $text;
-                    }
-                }
-            }
-        }
-
-        $sheetPath = 'xl/worksheets/sheet1.xml';
-        $workbookXml = $zip->getFromName('xl/workbook.xml');
-        if ($workbookXml !== false) {
-            libxml_use_internal_errors(true);
-            $workbook = simplexml_load_string($workbookXml);
-            libxml_clear_errors();
-            if ($workbook && isset($workbook->sheets->sheet)) {
-                $firstSheet = $workbook->sheets->sheet[0];
-                $rid = (string) $firstSheet->attributes('r', true)->id;
-                if ($rid !== '') {
-                    $relsXml = $zip->getFromName('xl/_rels/workbook.xml.rels');
-                    if ($relsXml !== false) {
-                        libxml_use_internal_errors(true);
-                        $rels = simplexml_load_string($relsXml);
-                        libxml_clear_errors();
-                        if ($rels && isset($rels->Relationship)) {
-                            foreach ($rels->Relationship as $rel) {
-                                if ((string) $rel['Id'] === $rid) {
-                                    $target = (string) $rel['Target'];
-                                    if ($target !== '') {
-                                        $sheetPath = strpos($target, 'xl/') === 0 ? $target : 'xl/' . ltrim($target, '/');
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         $sheetXml = $zip->getFromName($sheetPath);
         if ($sheetXml === false) {
-            throw new RuntimeException('Worksheet not found');
+            return [];
         }
 
+        libxml_use_internal_errors(true);
         $sheet = simplexml_load_string($sheetXml);
+        libxml_clear_errors();
         if (! $sheet || ! isset($sheet->sheetData->row)) {
-            throw new RuntimeException('Invalid worksheet');
+            return [];
         }
 
         $rows = [];
@@ -248,11 +189,68 @@ class Api extends BaseController
             }
         }
 
-        $zip->close();
         return $rows;
     }
 
-    private function buildHeaderMapFromRows(array $rows, int $maxRows = 10): array
+    private function readXlsxSheets(string $filePath): array
+    {
+        if (! class_exists(ZipArchive::class)) {
+            throw new RuntimeException('ZIP extension not available');
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($filePath) !== true) {
+            throw new RuntimeException('Unable to open xlsx file');
+        }
+
+        $sharedStrings = [];
+        $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
+        if ($sharedXml !== false) {
+            libxml_use_internal_errors(true);
+            $shared = simplexml_load_string($sharedXml);
+            libxml_clear_errors();
+            if ($shared && isset($shared->si)) {
+                foreach ($shared->si as $si) {
+                    if (isset($si->t)) {
+                        $sharedStrings[] = (string) $si->t;
+                    } elseif (isset($si->r)) {
+                        $text = '';
+                        foreach ($si->r as $run) {
+                            $text .= (string) $run->t;
+                        }
+                        $sharedStrings[] = $text;
+                    }
+                }
+            }
+        }
+
+        $sheetPaths = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (preg_match('/^xl\\/worksheets\\/sheet\\d+\\.xml$/', $name)) {
+                $sheetPaths[] = $name;
+            }
+        }
+        natsort($sheetPaths);
+
+        $sheets = [];
+        foreach ($sheetPaths as $sheetPath) {
+            try {
+                $rows = $this->readXlsxSheetRows($zip, $sheetPath, $sharedStrings);
+            } catch (Throwable $e) {
+                $rows = [];
+            }
+            $sheets[] = [
+                'path' => $sheetPath,
+                'rows' => $rows,
+            ];
+        }
+
+        $zip->close();
+        return $sheets;
+    }
+
+    private function buildHeaderMapFromRows(array $rows, int $maxRows = 30): array
     {
         $headerMapRaw = [
             'cid' => 'cid',
@@ -273,16 +271,28 @@ class Api extends BaseController
             'ตำแหน่งส่วนราชการตามว๑๘' => 'position_level',
             'ตำแหน่งส่วนราชการตามจ18' => 'position_level',
             'ตำแหน่งส่วนราชการตามจ๑๘' => 'position_level',
+            'ตำแหน่ง/ส่วนราชการตามจ18' => 'position_level',
+            'ตำแหน่ง/ส่วนราชการตามจ๑๘' => 'position_level',
+            'ตำแหน่ง' => 'position_title',
+            'ตำแหน่งงาน' => 'position_title',
+            'โรงพยาบาล' => 'position_hospital',
+            'รพ.' => 'position_hospital',
+            'สสจ' => 'position_office',
+            'สสจ.' => 'position_office',
+            'สำนักงานสาธารณสุขจังหวัด' => 'position_office',
             'ตำแหน่งเลขที่' => 'position_no',
             'สถานที่ปฏิบัติงานจริง' => 'workplace',
             'หลักสูตร' => 'program',
             'หลักสูตรปี' => 'program_years',
+            'หลักสูตร (ปี)' => 'program_years',
             'หลักสูตร(ปี)' => 'program_years',
             'สถานที่ศึกษา' => 'institute',
             'เริ่มต้นวด้ป' => 'start_date',
             'ตั้งแต่วดป' => 'start_date',
+            'ตั้งแต่ (ว.ด.ป.)' => 'start_date',
             'สิ้นสุดวด้ป' => 'end_date',
             'ถึงวดป' => 'end_date',
+            'ถึง (ว.ด.ป.)' => 'end_date',
             'ปีที่ขออนุมัติ' => 'approval_year',
             'หมายเหตุ' => 'note',
             'โควตา' => 'note',
@@ -329,10 +339,13 @@ class Api extends BaseController
 
     private function findDataStart(array $rows, array $map): int
     {
-        $limit = min(20, count($rows));
+        $limit = min(40, count($rows));
         for ($i = 0; $i < $limit; $i++) {
             $fullName = $this->getCell($rows[$i], $map, 'full_name');
             $position = $this->getCell($rows[$i], $map, 'position_level');
+            if ($position === null || trim($position) === '') {
+                $position = $this->getCell($rows[$i], $map, 'position_title');
+            }
             if ($fullName !== null && trim($fullName) !== '' && $position !== null && trim($position) !== '') {
                 return $i;
             }
@@ -370,6 +383,72 @@ class Api extends BaseController
         $title = trim($parts[0]) !== '' ? trim($parts[0]) : $raw;
         $normalized = preg_replace('/\s+/', ' ', $title);
         return $normalized ?? $title;
+    }
+
+    private function splitPositionParts(string $value): array
+    {
+        $value = trim($value);
+        $value = preg_replace('/\s+/u', ' ', $value);
+        if ($value === '') {
+            return ['title' => '', 'hospital' => '', 'office' => ''];
+        }
+
+        $tokens = preg_split('/\s+/u', $value);
+        if (! $tokens) {
+            return ['title' => $value, 'hospital' => '', 'office' => ''];
+        }
+
+        $officeIndex = null;
+        $hospitalIndex = null;
+        foreach ($tokens as $index => $token) {
+            if ($officeIndex === null && (
+                mb_strpos($token, 'สสจ.') !== false
+                || mb_strpos($token, 'สสจ') !== false
+                || mb_strpos($token, 'สสอ.') !== false
+                || mb_strpos($token, 'สสอ') !== false
+                || mb_strpos($token, 'สำนักงานสาธารณสุขจังหวัด') !== false
+                || mb_strpos($token, 'สำนักงานสาธารณสุขอำเภอ') !== false
+                || mb_strpos($token, 'สนง.สสจ.') !== false
+                || mb_strpos($token, 'สนง.สสจ') !== false
+                || mb_strpos($token, 'สนง.สสอ.') !== false
+                || mb_strpos($token, 'สนง.สสอ') !== false
+            )) {
+                $officeIndex = $index;
+            }
+            if ($hospitalIndex === null && (
+                preg_match('/^รพ(?:\\.|[ก-ฮ]|$)/u', $token) === 1
+                || mb_strpos($token, 'รพช') !== false
+                || mb_strpos($token, 'รพศ') !== false
+                || mb_strpos($token, 'รพท') !== false
+                || mb_strpos($token, 'รพ.สต') !== false
+                || mb_strpos($token, 'โรงพยาบาล') !== false
+                || mb_strpos($token, 'โรงพยาบาลส่งเสริมสุขภาพตำบล') !== false
+            )) {
+                $hospitalIndex = $index;
+            }
+        }
+
+        $endIndex = $officeIndex ?? count($tokens);
+        $office = $officeIndex !== null ? implode(' ', array_slice($tokens, $officeIndex)) : '';
+
+        if ($hospitalIndex !== null && $hospitalIndex < $endIndex) {
+            $title = implode(' ', array_slice($tokens, 0, $hospitalIndex));
+            $hospital = implode(' ', array_slice($tokens, $hospitalIndex, $endIndex - $hospitalIndex));
+            return ['title' => $title, 'hospital' => $hospital, 'office' => $office];
+        }
+
+        if (count($tokens) >= 3) {
+            $title = implode(' ', array_slice($tokens, 0, -2));
+            $hospital = $tokens[count($tokens) - 2];
+            $office = $tokens[count($tokens) - 1];
+            return ['title' => $title, 'hospital' => $hospital, 'office' => $office];
+        }
+
+        if (count($tokens) === 2) {
+            return ['title' => $tokens[0], 'hospital' => $tokens[1], 'office' => ''];
+        }
+
+        return ['title' => $value, 'hospital' => '', 'office' => ''];
     }
 
     private function mapPositionCategory(string $position): string
@@ -440,7 +519,9 @@ class Api extends BaseController
                 $due++;
             }
 
-            $position = $this->extractPositionTitle((string) ($row['position_level'] ?? ''));
+            $positionRaw = (string) ($row['position_level'] ?? '');
+            $parts = $this->splitPositionParts($positionRaw);
+            $position = $this->extractPositionTitle($parts['title'] !== '' ? $parts['title'] : $positionRaw);
             if (! isset($positionCounts[$position])) {
                 $positionCounts[$position] = 0;
             }
@@ -493,7 +574,6 @@ class Api extends BaseController
             $required = [
                 'cid',
                 'full_name',
-                'position_level',
                 'position_no',
                 'workplace',
                 'program',
@@ -509,6 +589,20 @@ class Api extends BaseController
                 }
             }
 
+            $positionTitle = trim((string) ($payload['position_title'] ?? ''));
+            $positionHospital = trim((string) ($payload['position_hospital'] ?? ''));
+            $positionOffice = trim((string) ($payload['position_office'] ?? ''));
+            $positionLevelRaw = trim((string) ($payload['position_level'] ?? ''));
+            if ($positionTitle === '' && $positionLevelRaw !== '') {
+                $parts = $this->splitPositionParts($positionLevelRaw);
+                $positionTitle = $parts['title'];
+                $positionHospital = $parts['hospital'];
+                $positionOffice = $parts['office'];
+            }
+            if ($positionTitle === '') {
+                return $this->json(['error' => 'Missing field: position_title'], 400);
+            }
+
             $startDate = $this->parseDateValue($payload['start_date']);
             $endDate = $this->parseDateValue($payload['end_date']);
             if ($startDate === null || $endDate === null) {
@@ -521,10 +615,18 @@ class Api extends BaseController
                 $programYears = 1;
             }
 
+            $positionLevel = trim(implode(' ', array_filter([$positionTitle, $positionHospital, $positionOffice], static fn ($value) => $value !== '')));
+            if ($positionLevel === '') {
+                $positionLevel = $positionLevelRaw;
+            }
+
             $data = [
                 'cid' => $payload['cid'],
                 'full_name' => $payload['full_name'],
-                'position_level' => $payload['position_level'],
+                'position_level' => $positionLevel,
+                'position_title' => $positionTitle,
+                'position_hospital' => $positionHospital,
+                'position_office' => $positionOffice,
                 'position_no' => $payload['position_no'],
                 'workplace' => $payload['workplace'],
                 'program' => $payload['program'],
@@ -583,17 +685,40 @@ class Api extends BaseController
                 continue;
             }
 
-            $positionTitle = $this->extractPositionTitle((string) ($row['position_level'] ?? ''));
+            $positionTitleRaw = (string) ($row['position_title'] ?? '');
+            if ($positionTitleRaw === '') {
+                $positionLevelFallback = (string) ($row['position_level'] ?? '');
+                if ($positionLevelFallback !== '') {
+                    $parts = $this->splitPositionParts($positionLevelFallback);
+                    $positionTitleRaw = $parts['title'] !== '' ? $parts['title'] : $positionLevelFallback;
+                }
+            }
+            $positionTitle = $this->extractPositionTitle($positionTitleRaw);
             $categoryLabel = $this->mapPositionCategory($positionTitle);
             $categoryKey = $categoryMap[$categoryLabel] ?? 'other';
             if ($positionCategory !== 'all' && $categoryKey !== $positionCategory) {
                 continue;
             }
 
+            $positionHospital = (string) ($row['position_hospital'] ?? '');
+            $positionOffice = (string) ($row['position_office'] ?? '');
+            if ($positionTitleRaw !== '' && ($positionHospital === '' && $positionOffice === '')) {
+                $parts = $this->splitPositionParts($positionTitleRaw);
+                $positionHospital = $parts['hospital'];
+                $positionOffice = $parts['office'];
+            }
+            $positionCombined = trim(implode(' ', array_filter([$positionTitle, $positionHospital, $positionOffice], static fn ($value) => $value !== '')));
+            if ($positionCombined === '') {
+                $positionCombined = (string) ($row['position_level'] ?? '');
+            }
+
             $data[] = [
                 'id' => (int) $row['id'],
                 'cid' => $row['cid'],
                 'position_level' => $row['position_level'],
+                'position_title' => $positionTitle,
+                'position_hospital' => $positionHospital !== '' ? $positionHospital : null,
+                'position_office' => $positionOffice !== '' ? $positionOffice : null,
                 'position_no' => $row['position_no'],
                 'workplace' => $row['workplace'],
                 'program' => $row['program'],
@@ -601,7 +726,7 @@ class Api extends BaseController
                 'institute' => $row['institute'],
                 'note' => $row['note'],
                 'full_name' => $row['full_name'],
-                'position' => $row['position_level'],
+                'position' => $positionCombined,
                 'position_category' => $categoryKey,
                 'order_no' => $row['order_no'],
                 'level' => $row['program'],
@@ -743,43 +868,20 @@ class Api extends BaseController
         $storedPath = 'public/uploads/' . $newName;
 
         try {
-            $rows = $this->readXlsxRows($uploadDir . DIRECTORY_SEPARATOR . $newName);
+            $sheets = $this->readXlsxSheets($uploadDir . DIRECTORY_SEPARATOR . $newName);
         } catch (Throwable $e) {
             return $this->json(['error' => 'Unable to read Excel file: ' . $e->getMessage()], 400);
         }
 
-        if (! $rows) {
+        if (! $sheets) {
             return $this->json(['error' => 'Excel file is empty'], 400);
         }
 
         $required = ['cid', 'full_name', 'position_level', 'position_no', 'workplace', 'program', 'program_years', 'institute', 'start_date', 'end_date', 'order_no'];
-        $headerMap = $this->buildHeaderMapFromRows($rows, 10);
-        $missing = array_diff($required, array_keys($headerMap));
-        if ($missing) {
-            return $this->json([
-                'error' => 'Missing required columns',
-                'missing' => array_values($missing),
-                'expected' => [
-                    'cid',
-                    'ชื่อ-สกุล',
-                    'ตำแหน่ง/ส่วนราชการตาม จ.18',
-                    'ตำแหน่งเลขที่',
-                    'สถานที่ปฏิบัติงานจริง',
-                    'หลักสูตร',
-                    'หลักสูตร(ปี)',
-                    'สถานที่ศึกษา',
-                    'ตั้งแต่ (ว.ด.ป.)',
-                    'ถึง (ว.ด.ป.)',
-                    'หมายเหตุ',
-                    'เลขที่คำสั่ง',
-                ],
-            ], 400);
-        }
-
-        $dataStart = $this->findDataStart($rows, $headerMap);
-        if ($dataStart < 0) {
-            return $this->json(['error' => 'Unable to find data rows'], 400);
-        }
+        $positionColumns = ['position_level', 'position_title'];
+        $requiredFields = array_diff($required, ['position_level']);
+        $bestMissing = [];
+        $hasValidSheet = false;
 
         $db = Database::connect();
         $db->transBegin();
@@ -804,9 +906,41 @@ class Api extends BaseController
             }
 
             $builder = $db->table('study_leaves');
-            $dataRows = array_slice($rows, $dataStart);
-            foreach ($dataRows as $offset => $row) {
-                $rowNumber = $dataStart + $offset + 1;
+            foreach ($sheets as $sheet) {
+                $rows = $sheet['rows'] ?? [];
+                if (! $rows) {
+                    continue;
+                }
+
+                $headerMap = $this->buildHeaderMapFromRows($rows, 30);
+                $missing = array_diff($requiredFields, array_keys($headerMap));
+                $hasPosition = false;
+                foreach ($positionColumns as $column) {
+                    if (isset($headerMap[$column])) {
+                        $hasPosition = true;
+                        break;
+                    }
+                }
+                if (! $hasPosition) {
+                    $missing[] = 'position_level';
+                }
+
+                if ($missing) {
+                    if (! $bestMissing || count($missing) < count($bestMissing)) {
+                        $bestMissing = array_values($missing);
+                    }
+                    continue;
+                }
+
+                $dataStart = $this->findDataStart($rows, $headerMap);
+                if ($dataStart < 0) {
+                    continue;
+                }
+
+                $hasValidSheet = true;
+                $dataRows = array_slice($rows, $dataStart);
+                foreach ($dataRows as $offset => $row) {
+                    $rowNumber = $dataStart + $offset + 1;
                 $cid = $this->getCell($row, $headerMap, 'cid');
                 $fullName = $this->getCell($row, $headerMap, 'full_name');
                 if ($cid === null && $fullName === null) {
@@ -854,6 +988,21 @@ class Api extends BaseController
                     $programYears = 1;
                 }
 
+                $positionLevelRaw = $this->getCell($row, $headerMap, 'position_level') ?? '';
+                $positionTitle = $this->getCell($row, $headerMap, 'position_title') ?? '';
+                $positionHospital = $this->getCell($row, $headerMap, 'position_hospital') ?? '';
+                $positionOffice = $this->getCell($row, $headerMap, 'position_office') ?? '';
+                if ($positionTitle === '' && $positionLevelRaw !== '') {
+                    $parts = $this->splitPositionParts($positionLevelRaw);
+                    $positionTitle = $parts['title'];
+                    $positionHospital = $parts['hospital'];
+                    $positionOffice = $parts['office'];
+                }
+                $positionLevel = trim(implode(' ', array_filter([$positionTitle, $positionHospital, $positionOffice], static fn ($value) => $value !== '')));
+                if ($positionLevel === '') {
+                    $positionLevel = $positionLevelRaw;
+                }
+
                 $orderNo = $this->getCell($row, $headerMap, 'order_no') ?? '';
                 $key = strtolower(trim((string) ($cid ?? '')))
                     . '|' . strtolower(trim((string) $orderNo))
@@ -890,21 +1039,48 @@ class Api extends BaseController
                 }
 
                 $seenKeys[$key] = true;
-                $builder->insert([
-                    'cid' => $cid ?? '',
-                    'full_name' => $fullName ?? '',
-                    'position_level' => $this->getCell($row, $headerMap, 'position_level') ?? '',
-                    'position_no' => $this->getCell($row, $headerMap, 'position_no') ?? '',
-                    'workplace' => $this->getCell($row, $headerMap, 'workplace') ?? '',
-                    'program' => $this->getCell($row, $headerMap, 'program') ?? '',
-                    'program_years' => $programYears,
-                    'institute' => $this->getCell($row, $headerMap, 'institute') ?? '',
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                    'note' => $this->getCell($row, $headerMap, 'note'),
-                    'order_no' => $orderNo,
-                ]);
-                $inserted++;
+                    $builder->insert([
+                        'cid' => $cid ?? '',
+                        'full_name' => $fullName ?? '',
+                        'position_level' => $positionLevel ?? '',
+                        'position_title' => $positionTitle ?? '',
+                        'position_hospital' => $positionHospital ?? '',
+                        'position_office' => $positionOffice ?? '',
+                        'position_no' => $this->getCell($row, $headerMap, 'position_no') ?? '',
+                        'workplace' => $this->getCell($row, $headerMap, 'workplace') ?? '',
+                        'program' => $this->getCell($row, $headerMap, 'program') ?? '',
+                        'program_years' => $programYears,
+                        'institute' => $this->getCell($row, $headerMap, 'institute') ?? '',
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'note' => $this->getCell($row, $headerMap, 'note'),
+                        'order_no' => $orderNo,
+                    ]);
+                    $inserted++;
+                }
+            }
+
+            if (! $hasValidSheet) {
+                $db->transRollback();
+                $missing = $bestMissing ?: ['cid', 'full_name', 'position_level', 'position_no', 'workplace', 'program', 'program_years', 'institute', 'start_date', 'end_date', 'order_no'];
+                return $this->json([
+                    'error' => 'Missing required columns',
+                    'missing' => $missing,
+                    'expected' => [
+                        'cid',
+                        'ชื่อ-สกุล',
+                        'ตำแหน่ง/ส่วนราชการตาม จ.18 หรือ ตำแหน่ง',
+                        'ตำแหน่งเลขที่',
+                        'สถานที่ปฏิบัติงานจริง',
+                        'หลักสูตร',
+                        'หลักสูตร(ปี)',
+                        'สถานที่ศึกษา',
+                        'ตั้งแต่ (ว.ด.ป.)',
+                        'ถึง (ว.ด.ป.)',
+                        'หมายเหตุ',
+                        'เลขที่คำสั่ง',
+                    ],
+                ], 400);
             }
 
             $db->transCommit();

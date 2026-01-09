@@ -112,7 +112,19 @@
 
         if (!res.ok) {
           const msg = data.error || data.message || `อัปโหลดไม่สำเร็จ (${res.status})`;
-          statusBox.textContent = msg;
+          const missing = Array.isArray(data.missing) ? data.missing : [];
+          const missingHtml = missing.length ? `
+            <div class="mt-2 text-sm text-slate-600">
+              <div class="font-semibold text-slate-700">คอลัมน์ที่ขาด</div>
+              <ul class="list-disc pl-5 space-y-1">
+                ${missing.map(col => `<li>${col}</li>`).join('')}
+              </ul>
+            </div>
+          ` : '';
+          statusBox.innerHTML = `
+            ❌ ${msg}
+            ${missingHtml}
+          `;
           statusBox.className = 'mt-3 text-sm text-red-600';
         } else {
           const duplicates = Array.isArray(data.duplicates) ? data.duplicates : [];

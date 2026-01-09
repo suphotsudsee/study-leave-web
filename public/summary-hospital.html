@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyLeave | สรุปตามสถานที่ปฏิบัติงาน</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="sidebar.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .card-hover:hover { transform: translateY(-1px); box-shadow: 0 10px 18px -14px rgba(0, 0, 0, 0.35); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="flex">
+    <!-- Sidebar -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main content -->
+    <div class="flex-1 min-h-screen">
+      <!-- Top bar -->
+      <header class="h-16 bg-white shadow flex items-center justify-between px-6">
+        <div class="flex items-center gap-3 text-slate-500">
+          <button class="lg:hidden text-xl">☰</button>
+          <div class="flex items-center gap-2 text-sm">
+            <a href="index.html" class="text-slate-400 hover:text-slate-600">Home</a>
+            <span class="text-slate-300">/</span>
+            <span class="font-semibold text-slate-700">สรุปตามสถานที่ปฏิบัติงาน</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 text-slate-500">
+          <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white">
+            <span class="text-lg">👤</span>
+            <span id="auth-name" class="text-sm font-semibold text-slate-700">ผู้ใช้งาน</span>
+          </div>
+          <button id="auth-logout" class="px-3 py-1 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50">ออกจากระบบ</button>
+        </div>
+      </header>
+
+      <main class="p-6 space-y-6">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">สรุปตามสถานที่ปฏิบัติงาน</h1>
+            <p class="text-sm text-slate-500">สรุปจำนวนผู้ลาศึกษาตามสถานที่ปฏิบัติงาน (โรงพยาบาล/หน่วยบริการ)</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="keyword" type="search" placeholder="ค้นหาสถานที่ปฏิบัติงาน..." class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 w-64">
+            <select id="status-filter" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
+              <option value="all">ทุกสถานะ</option>
+              <option value="active">กำลังศึกษา</option>
+              <option value="pending">รอดำเนินการ</option>
+              <option value="completed">จบการศึกษา</option>
+            </select>
+            <select id="fiscal-year" class="px-3 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">
+              <option value="">กำลังโหลดปีงบประมาณ...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-xl p-4 border border-slate-100 card-hover">
+            <div class="text-sm text-slate-500">จำนวนสถานที่ปฏิบัติงาน</div>
+            <div id="summary-hospitals" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 border border-slate-100 card-hover">
+            <div class="text-sm text-slate-500">จำนวนผู้ลาศึกษา</div>
+            <div id="summary-total" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 border border-slate-100 card-hover">
+            <div class="text-sm text-slate-500">กำลังศึกษา</div>
+            <div id="summary-active" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+          <div class="bg-white rounded-xl p-4 border border-slate-100 card-hover">
+            <div class="text-sm text-slate-500">รอดำเนินการ / จบการศึกษา</div>
+            <div id="summary-other" class="text-2xl font-bold text-slate-900">—</div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="font-semibold text-slate-700 flex items-center gap-2">
+              <span class="text-xl">🏥</span>
+              รายการสรุปตามสถานที่ปฏิบัติงาน
+            </div>
+            <div id="report-updated" class="text-xs text-slate-400"></div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50 text-slate-500">
+                <tr>
+                  <th class="text-left font-semibold px-6 py-3">สถานที่ปฏิบัติงาน</th>
+                  <th class="text-center font-semibold px-4 py-3">ทั้งหมด</th>
+                  <th class="text-center font-semibold px-4 py-3">กำลังศึกษา</th>
+                  <th class="text-center font-semibold px-4 py-3">รอดำเนินการ</th>
+                  <th class="text-center font-semibold px-4 py-3">จบการศึกษา</th>
+                </tr>
+              </thead>
+              <tbody id="hospital-rows" class="divide-y divide-slate-100">
+                <tr>
+                  <td class="px-6 py-6 text-sm text-slate-500" colspan="5">กำลังโหลดข้อมูล...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script>
+    const BASE_API = 'api';
+    const fiscalYearEl = document.getElementById('fiscal-year');
+    const statusFilterEl = document.getElementById('status-filter');
+    const keywordEl = document.getElementById('keyword');
+    const hospitalsEl = document.getElementById('summary-hospitals');
+    const totalEl = document.getElementById('summary-total');
+    const activeEl = document.getElementById('summary-active');
+    const otherEl = document.getElementById('summary-other');
+    const rowsEl = document.getElementById('hospital-rows');
+    const updatedEl = document.getElementById('report-updated');
+
+    let allLeaves = [];
+
+    function getHospital(item) {
+      const hospital = (item.position_hospital || '').trim();
+      if (hospital) return hospital;
+      const raw = (item.position_level || item.position || '').trim();
+      if (!raw) return 'ไม่ระบุสถานที่ปฏิบัติงาน';
+      const tokens = raw.split(/\s+/).filter(Boolean);
+      if (tokens.length >= 2) {
+        return tokens[tokens.length - 2];
+      }
+      return raw;
+    }
+
+    function getFiscalYear(dateStr) {
+      if (!dateStr) return null;
+      const date = new Date(`${dateStr}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return null;
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const fiscalYearAd = month >= 10 ? year + 1 : year;
+      return fiscalYearAd + 543;
+    }
+
+    function renderFiscalYears(list, selected) {
+      if (!Array.isArray(list) || list.length === 0) {
+        fiscalYearEl.innerHTML = '<option value="all">ปีงบทั้งหมด</option>';
+        fiscalYearEl.value = 'all';
+        return;
+      }
+      const options = ['<option value="all">ปีงบทั้งหมด</option>']
+        .concat(list.map((year) => `<option value="${year}">ปีงบประมาณ ${year}</option>`));
+      fiscalYearEl.innerHTML = options.join('');
+      fiscalYearEl.value = selected || 'all';
+    }
+
+    function summarizeAndRender() {
+      const keyword = (keywordEl.value || '').trim().toLowerCase();
+      const statusFilter = statusFilterEl.value || 'all';
+      const fiscalYear = fiscalYearEl.value || 'all';
+
+      const filtered = allLeaves.filter((item) => {
+        const hospital = getHospital(item);
+        const matchesKeyword = !keyword || hospital.toLowerCase().includes(keyword);
+        const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+        const itemFiscalYear = getFiscalYear(item.start_date);
+        const matchesYear = fiscalYear === 'all' || String(itemFiscalYear) === String(fiscalYear);
+        return matchesKeyword && matchesStatus && matchesYear;
+      });
+
+      const groups = new Map();
+      let activeCount = 0;
+      let pendingCount = 0;
+      let completedCount = 0;
+
+      filtered.forEach((item) => {
+        const hospital = getHospital(item);
+        if (!groups.has(hospital)) {
+          groups.set(hospital, { hospital, total: 0, active: 0, pending: 0, completed: 0 });
+        }
+        const group = groups.get(hospital);
+        group.total += 1;
+        if (item.status === 'active') {
+          group.active += 1;
+          activeCount += 1;
+        } else if (item.status === 'pending') {
+          group.pending += 1;
+          pendingCount += 1;
+        } else if (item.status === 'completed') {
+          group.completed += 1;
+          completedCount += 1;
+        }
+      });
+
+      const rows = Array.from(groups.values()).sort((a, b) => b.total - a.total);
+      hospitalsEl.textContent = `${groups.size} แห่ง`;
+      totalEl.textContent = `${filtered.length} คน`;
+      activeEl.textContent = `${activeCount} คน`;
+      otherEl.textContent = `${pendingCount + completedCount} คน`;
+      updatedEl.textContent = `ข้อมูลอัปเดตเมื่อ ${new Date().toLocaleString('th-TH')}`;
+
+      if (rows.length === 0) {
+        rowsEl.innerHTML = '<tr><td class="px-6 py-6 text-sm text-slate-500" colspan="5">ไม่พบข้อมูล</td></tr>';
+        return;
+      }
+
+      rowsEl.innerHTML = rows.map((row) => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 text-slate-700 font-medium">${row.hospital}</td>
+          <td class="px-4 py-4 text-center text-slate-700">${row.total}</td>
+          <td class="px-4 py-4 text-center text-slate-700">${row.active}</td>
+          <td class="px-4 py-4 text-center text-slate-700">${row.pending}</td>
+          <td class="px-4 py-4 text-center text-slate-700">${row.completed}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadData() {
+      rowsEl.innerHTML = '<tr><td class="px-6 py-6 text-sm text-slate-500" colspan="5">กำลังโหลดข้อมูล...</td></tr>';
+      try {
+        const res = await fetch(`${BASE_API}/leaves`);
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok || !payload.data) {
+          rowsEl.innerHTML = '<tr><td class="px-6 py-6 text-sm text-red-600" colspan="5">เชื่อมต่อ API ไม่สำเร็จ</td></tr>';
+          return;
+        }
+        allLeaves = payload.data;
+        const fiscalYears = Array.from(new Set(allLeaves.map((item) => getFiscalYear(item.start_date)).filter(Boolean)));
+        fiscalYears.sort((a, b) => b - a);
+        renderFiscalYears(fiscalYears, fiscalYears[0] ? String(fiscalYears[0]) : 'all');
+        summarizeAndRender();
+      } catch (err) {
+        rowsEl.innerHTML = '<tr><td class="px-6 py-6 text-sm text-red-600" colspan="5">เชื่อมต่อ API ไม่สำเร็จ</td></tr>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      renderAuthStatus();
+      loadData();
+      keywordEl.addEventListener('input', summarizeAndRender);
+      statusFilterEl.addEventListener('change', summarizeAndRender);
+      fiscalYearEl.addEventListener('change', summarizeAndRender);
+    });
+  </script>
+  <footer class="mt-10 border-t border-slate-200 bg-white">
+    <div class="max-w-7xl mx-auto px-6 py-4 text-center text-xs text-slate-500">
+      <div>Copyright © 2026 by สุพจน์ สุดสี. All Rights Reserved.</div>
+      <div>กลุ่มงานสุขภาพดิจิทัล สำนักงานสาธารณสุขจังหวัดอุบลราชธานี</div>
+    </div>
+  </footer>
+</body>
+</html>

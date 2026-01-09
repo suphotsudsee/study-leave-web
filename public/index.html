@@ -309,7 +309,7 @@
                   <div class="font-semibold text-slate-800">${item.full_name || '-'}</div>
                   <div class="text-xs text-slate-500">${item.order_no || '-'}</div>
                 </div>
-                <div class="col-span-3 text-sm text-slate-600">${item.position_level || '-'}</div>
+                <div class="col-span-3 text-sm text-slate-600">${item.position_title || item.position_level || '-'}</div>
                 <div class="col-span-3 text-sm text-slate-600">${item.workplace || '-'}</div>
                 <div class="col-span-2 text-right text-sm text-slate-600">
                   <div>${startDate} - ${endDate}</div>
