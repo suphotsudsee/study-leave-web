@@ -206,15 +206,20 @@
         return;
       }
 
-      rowsEl.innerHTML = rows.map((row) => `
+      rowsEl.innerHTML = rows.map((row) => {
+        const link = `leaves.html?hospital=${encodeURIComponent(row.hospital)}`;
+        return `
         <tr class="hover:bg-slate-50">
-          <td class="px-6 py-4 text-slate-700 font-medium">${row.hospital}</td>
+          <td class="px-6 py-4 text-slate-700 font-medium">
+            <a href="${link}" class="text-blue-700 hover:text-blue-900 hover:underline">${row.hospital}</a>
+          </td>
           <td class="px-4 py-4 text-center text-slate-700">${row.total}</td>
           <td class="px-4 py-4 text-center text-slate-700">${row.active}</td>
           <td class="px-4 py-4 text-center text-slate-700">${row.pending}</td>
           <td class="px-4 py-4 text-center text-slate-700">${row.completed}</td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     async function loadData() {

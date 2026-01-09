@@ -229,9 +229,12 @@
         const topInstituteLocal = getTopLabel(row.instituteCounts);
         const programText = topProgram.count ? `${topProgram.label} (${topProgram.count})` : '—';
         const instituteText = topInstituteLocal.count ? `${topInstituteLocal.label} (${topInstituteLocal.count})` : '—';
+        const link = `leaves.html?position=${encodeURIComponent(row.position)}`;
         return `
           <tr class="hover:bg-slate-50">
-            <td class="px-6 py-4 text-slate-700 font-medium">${row.position}</td>
+            <td class="px-6 py-4 text-slate-700 font-medium">
+              <a href="${link}" class="text-blue-700 hover:text-blue-900 hover:underline">${row.position}</a>
+            </td>
             <td class="px-4 py-4 text-center text-slate-700">${row.total}</td>
             <td class="px-4 py-4 text-slate-700">${programText}</td>
             <td class="px-4 py-4 text-slate-700">${instituteText}</td>

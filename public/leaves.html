@@ -510,6 +510,13 @@
     document.addEventListener('DOMContentLoaded', () => {
       requireAuth();
       renderAuthStatus();
+      const params = new URLSearchParams(window.location.search);
+      const position = params.get('position');
+      const hospital = params.get('hospital');
+      const keyword = hospital || position;
+      if (keyword) {
+        searchInput.value = keyword;
+      }
       loadLeaves();
     });
   </script>
