@@ -170,13 +170,21 @@
 
     function hasMissingFields(item, pos) {
       const hasPosition = Boolean((pos.title || pos.hospital || pos.office).trim());
-      return !item.full_name
+      return !item.cid
+        || !item.full_name
         || !hasPosition
-        || !item.level
-        || !item.type
+        || !item.position_no
+        || !item.workplace
+        || !item.program
+        || !item.program_years
+        || !item.institute
         || !item.start_date
         || !item.end_date
-        || !item.status;
+        || !item.order_no
+        || !item.status
+        || !item.level
+        || !item.type
+        || !item.note;
     }
 
     function renderSuspensions(list) {
