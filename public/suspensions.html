@@ -11,6 +11,13 @@
     body { font-family: 'Sarabun', sans-serif; }
     .badge { padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
     .card-hover:hover { transform: translateY(-1px); box-shadow: 0 10px 18px -14px rgba(0, 0, 0, 0.35); }
+    .row-missing { color: #dc2626; background: #fef2f2; }
+    .row-missing .badge { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+    .row-missing .text-slate-800,
+    .row-missing .text-slate-700,
+    .row-missing .text-slate-600,
+    .row-missing .text-slate-500,
+    .row-missing .text-slate-900 { color: #b91c1c; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -161,6 +168,17 @@
       return { title: raw, hospital: '', office: '' };
     }
 
+    function hasMissingFields(item, pos) {
+      const hasPosition = Boolean((pos.title || pos.hospital || pos.office).trim());
+      return !item.full_name
+        || !hasPosition
+        || !item.level
+        || !item.type
+        || !item.start_date
+        || !item.end_date
+        || !item.status;
+    }
+
     function renderSuspensions(list) {
       if (!list || !list.length) {
         suspRows.innerHTML = `<div class="px-6 py-6 text-sm text-slate-500">ไม่พบข้อมูล</div>`;
@@ -169,8 +187,9 @@
 
       suspRows.innerHTML = list.map(item => {
         const pos = getPositionParts(item);
+        const isMissing = hasMissingFields(item, pos);
         return `
-        <div class="px-6 py-4 grid grid-cols-12 items-center card-hover">
+        <div class="px-6 py-4 grid grid-cols-12 items-center card-hover${isMissing ? ' row-missing' : ''}">
           <div class="col-span-4 min-w-0">
             <div class="font-semibold text-slate-800">${item.full_name || '-'}</div>
             <div class="text-sm text-slate-600 flex flex-wrap items-center gap-2 min-w-0">
